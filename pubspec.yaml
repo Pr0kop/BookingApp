@@ -37,7 +37,7 @@ dependencies:
   # Use with the CupertinoIcons class for iOS style icons.
   cupertino_icons: any
   google_fonts: any
-  firebase_auth: any
+  firebase_auth:
   firebase_auth_ui: any
   firebase_core: any
   flutter_riverpod: any

@@ -104,10 +104,7 @@ class _MyHomePageState extends State<MyHomePage> {
         AuthProvider.phone()
       ]).then((firebaseUser) {
         // odswiezenie stanu
-        context
-        //.read(userLogged)
-            .read()
-            .state = FirebaseAuth.instance.currentUser;
+        context.read().state = userLogged;
         ScaffoldMessenger.of(scaffoldState.currentContext).showSnackBar(
             SnackBar(content: Text('Zalogowano pomyslnie ${FirebaseAuth.instance.currentUser.phoneNumber}')));
       }).catchError((e) {
@@ -118,7 +115,7 @@ class _MyHomePageState extends State<MyHomePage> {
           else
             ScaffoldMessenger.of(scaffoldState.currentContext).showSnackBar(
                 SnackBar(content: Text('Nieznany blad')));
-      });
+       });
     }
     else // zalogowany -> przejdz na strone glowna
         {
