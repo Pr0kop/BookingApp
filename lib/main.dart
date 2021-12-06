@@ -2,6 +2,8 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_auth_ui/firebase_auth_ui.dart';
 import 'package:firebase_auth_ui/providers.dart';
 import 'package:firebase_core/firebase_core.dart';
+import 'package:first_app/screens/home_screen.dart';
+import 'package:first_app/utils/utils.dart';
 import 'package:flutter/services.dart';
 import 'state/state_managment.dart';
 import 'package:flutter/material.dart';
@@ -25,6 +27,14 @@ class MyApp extends StatelessWidget {
   Widget build(BuildContext context) {
     return MaterialApp(
       title: 'Flutter Demo',
+      onGenerateRoute: (settings){
+        switch(settings.name) {
+          case '/home':
+            return PageTransition(child: HomePage(), type: PageTransitionType.fade);
+            break;
+          default: return null;
+        }
+      },
       theme: ThemeData(
         // This is the theme of your application.
         //
@@ -37,12 +47,12 @@ class MyApp extends StatelessWidget {
         // is not restarted.
         primarySwatch: Colors.blue,
       ),
-      home: const MyHomePage(title: 'Flutter Demo Home Page'),
+      home: MyHomePage(),
     );
   }
 }
 
-class MyHomePage extends StatefulWidget {
+/* class MyHomePage extends StatefulWidget {
   //const MyHomePage({Key? key, required this.title}) : super(key: key);
   const MyHomePage({Key key, this.title}) : super(key: key);
 
@@ -60,40 +70,10 @@ class MyHomePage extends StatefulWidget {
 
   @override
   State<MyHomePage> createState() => _MyHomePageState();
-}
+} */
 
-class _MyHomePageState extends State<MyHomePage> {
+class MyHomePage extends ConsumerWidget {
   GlobalKey<ScaffoldState> scaffoldState = new GlobalKey();
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      key: scaffoldState,
-      body: Container(
-        decoration: BoxDecoration(
-            image: DecorationImage(
-                image: AssetImage('assets/images/bookingappimg.jpg'),
-                fit: BoxFit.cover)),
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.end,
-          children: [
-            Container(
-              padding: const EdgeInsets.all(16),
-              width: MediaQuery.of(context).size.width,
-              // child: ElevatedButton(onPressed: () {  }, child: Text('Zaloguj')),
-              child: ElevatedButton.icon(
-                onPressed: () => processLogin(context),
-                icon: Icon(Icons.phone, color: Colors.white),
-                label: Text('Zaloguj', style: TextStyle(color:Colors.white),),
-                style: ButtonStyle(
-                    backgroundColor: MaterialStateProperty.all(Colors.blueAccent)
-                ),
-              ),
-            )
-          ],
-        ),
-      ),
-    );
-  }
 
   processLogin(BuildContext context) {
     var user = FirebaseAuth.instance.currentUser;
@@ -122,4 +102,65 @@ class _MyHomePageState extends State<MyHomePage> {
 
     }
   }
+
+  @override
+  Widget build(BuildContext context, watch) {
+    return Scaffold(
+      key: scaffoldState,
+      body: Container(
+        decoration: BoxDecoration(
+            image: DecorationImage(
+                image: AssetImage('assets/images/bookingappimg.jpg'),
+                fit: BoxFit.cover)),
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.end,
+          children: [
+            Container(
+              padding: const EdgeInsets.all(16),
+              width: MediaQuery.of(context).size.width,
+              // child: ElevatedButton(onPressed: () {  }, child: Text('Zaloguj')),
+              child: FutureBuilder(
+                future: checkLoginState(context),
+                builder: (context,snapshot) {
+                  if(snapshot.connectionState == ConnectionState.waiting)
+                    return Center(child: CircularProgressIndicator(),);
+                  else {
+                    var userState = snapshot.data as LOGIN_STATE;
+                    if(userState == LOGIN_STATE.LOGGED) {
+                      return Container();
+                    }
+                    else { // jesli uzytkownik nie zalogowal sie - zwroc przycisk do logowania
+                      return ElevatedButton.icon(
+                        onPressed: ()=> processLogin(context),
+                        icon:Icon(Icons.phone,color:Colors.white),
+                        label: Text('Zaloguj sie',style: TextStyle(color: Colors.white),),
+                        style: ButtonStyle(backgroundColor: MaterialStateProperty.all(Colors.black)),
+                      );
+
+                    }
+                  }
+                },
+              ),
+            )
+          ],
+        ),
+      ),
+    );
+  }
+
+Future<LOGIN_STATE>  checkLoginState(BuildContext context) async {
+    await Future.delayed(Duration(seconds: 3))
+    .then((value) => {
+      FirebaseAuth.instance.currentUser
+      .getIdToken()
+      .then((token) {
+        print('$token');
+        context.read(userToken).state = token;
+        Navigator.pushNamedAndRemoveUntil(context, '/home', (route) => false);
+      })
+    });
+    return FirebaseAuth.instance.currentUser != null
+        ? LOGIN_STATE.LOGGED
+        : LOGIN_STATE.NOT_LOGIN;
+}
 }
