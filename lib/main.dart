@@ -110,7 +110,9 @@ class MyHomePage extends ConsumerWidget {
               width: MediaQuery.of(context).size.width,
               // child: ElevatedButton(onPressed: () {  }, child: Text('Zaloguj')),
               child: FutureBuilder(
+
                 future: checkLoginState(context, false, scaffoldState),
+
                 builder: (context,snapshot){
                   if(snapshot.connectionState == ConnectionState.waiting)
                     return Center(child: CircularProgressIndicator(),);
