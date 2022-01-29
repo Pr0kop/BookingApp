@@ -1,3 +1,4 @@
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_auth_ui/firebase_auth_ui.dart';
 import 'package:firebase_auth_ui/providers.dart';
@@ -5,11 +6,14 @@ import 'package:firebase_core/firebase_core.dart';
 import 'package:first_app/screens/home_screen.dart';
 import 'package:first_app/utils/utils.dart';
 import 'package:flutter/services.dart';
-import 'state/state_managment.dart';
+import 'package:page_transition/page_transition.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:first_app/state/state_managment.dart';
 import 'package:provider/provider.dart';
+import 'package:rflutter_alert/rflutter_alert.dart';
+//import 'package:flutter_bloc/flutter_bloc.dart' show BlocBuilder, BlocProvider;
+//import 'package:flutter_bloc/flutter_bloc.dart' hide ReadContext;
 
 Future<void> main() async{
   WidgetsFlutterBinding.ensureInitialized();
@@ -28,11 +32,15 @@ class MyApp extends StatelessWidget {
     return MaterialApp(
       title: 'Flutter Demo',
       onGenerateRoute: (settings){
-        switch(settings.name) {
+        switch(settings.name){
           case '/home':
-            return PageTransition(child: HomePage(), type: PageTransitionType.fade);
+            return PageTransition(
+                settings: settings,
+                child: HomePage(),
+                type: PageTransitionType.fade);
             break;
-          default: return null;
+          default:
+            return null;
         }
       },
       theme: ThemeData(
@@ -52,28 +60,10 @@ class MyApp extends StatelessWidget {
   }
 }
 
-/* class MyHomePage extends StatefulWidget {
-  //const MyHomePage({Key? key, required this.title}) : super(key: key);
-  const MyHomePage({Key key, this.title}) : super(key: key);
-
-
-  // This widget is the home page of your application. It is stateful, meaning
-  // that it has a State object (defined below) that contains fields that affect
-  // how it looks.
-
-  // This class is the configuration for the state. It holds the values (in this
-  // case the title) provided by the parent (in this case the App widget) and
-  // used by the build method of the State. Fields in a Widget subclass are
-  // always marked "final".
-
-  final String title;
-
-  @override
-  State<MyHomePage> createState() => _MyHomePageState();
-} */
 
 class MyHomePage extends ConsumerWidget {
   GlobalKey<ScaffoldState> scaffoldState = new GlobalKey();
+
 
   processLogin(BuildContext context) {
     var user = FirebaseAuth.instance.currentUser;
@@ -84,17 +74,17 @@ class MyHomePage extends ConsumerWidget {
         AuthProvider.phone()
       ]).then((firebaseUser) {
         // odswiezenie stanu
-        context.read().state = userLogged;
-        ScaffoldMessenger.of(scaffoldState.currentContext).showSnackBar(
-            SnackBar(content: Text('Zalogowano pomyslnie ${FirebaseAuth.instance.currentUser.phoneNumber}')));
-      }).catchError((e) {
+    //    context.read().state = userLogged;
+        Navigator.pushNamedAndRemoveUntil(context, '/home', (route) => false);
+        }).catchError((e) {
         if(e is PlatformException)
-          if(e.code == FirebaseAuthUi.kUserCancelledError)
+          if(e.code == FirebaseAuthUi.kUserCancelledError) {
             ScaffoldMessenger.of(scaffoldState.currentContext).showSnackBar(
                 SnackBar(content: Text('${e.message}')));
-          else
+          }else {
             ScaffoldMessenger.of(scaffoldState.currentContext).showSnackBar(
                 SnackBar(content: Text('Nieznany blad')));
+          }
        });
     }
     else // zalogowany -> przejdz na strone glowna
@@ -104,7 +94,7 @@ class MyHomePage extends ConsumerWidget {
   }
 
   @override
-  Widget build(BuildContext context, watch) {
+  Widget build(BuildContext context, WidgetRef ref) {
     return Scaffold(
       key: scaffoldState,
       body: Container(
@@ -120,23 +110,23 @@ class MyHomePage extends ConsumerWidget {
               width: MediaQuery.of(context).size.width,
               // child: ElevatedButton(onPressed: () {  }, child: Text('Zaloguj')),
               child: FutureBuilder(
-                future: checkLoginState(context),
-                builder: (context,snapshot) {
+                future: checkLoginState(context, false, scaffoldState),
+                builder: (context,snapshot){
                   if(snapshot.connectionState == ConnectionState.waiting)
                     return Center(child: CircularProgressIndicator(),);
-                  else {
+                  else{
                     var userState = snapshot.data as LOGIN_STATE;
-                    if(userState == LOGIN_STATE.LOGGED) {
+                    if(userState == LOGIN_STATE.LOGGED){
                       return Container();
                     }
-                    else { // jesli uzytkownik nie zalogowal sie - zwroc przycisk do logowania
+                    else{
+                      //If user not login before then return button
                       return ElevatedButton.icon(
-                        onPressed: ()=> processLogin(context),
-                        icon:Icon(Icons.phone,color:Colors.white),
-                        label: Text('Zaloguj sie',style: TextStyle(color: Colors.white),),
-                        style: ButtonStyle(backgroundColor: MaterialStateProperty.all(Colors.black)),
+                          onPressed: ()=> processLogin(context),
+                          icon: Icon(Icons.phone, color:Colors.white),
+                          label: Text('Zaloguj się', style: TextStyle(color: Colors.white),),
+                          style: ButtonStyle(backgroundColor: MaterialStateProperty.all(Colors.black)),
                       );
-
                     }
                   }
                 },
@@ -148,19 +138,80 @@ class MyHomePage extends ConsumerWidget {
     );
   }
 
-Future<LOGIN_STATE>  checkLoginState(BuildContext context) async {
-    await Future.delayed(Duration(seconds: 3))
-    .then((value) => {
-      FirebaseAuth.instance.currentUser
-      .getIdToken()
-      .then((token) {
-        print('$token');
-        context.read(userToken).state = token;
-        Navigator.pushNamedAndRemoveUntil(context, '/home', (route) => false);
-      })
-    });
-    return FirebaseAuth.instance.currentUser != null
-        ? LOGIN_STATE.LOGGED
-        : LOGIN_STATE.NOT_LOGIN;
-}
+  Future<LOGIN_STATE>  checkLoginState(BuildContext context,bool fromLogin, GlobalKey<ScaffoldState> scaffoldState) async{
+      if(!context.read().state) {
+        await Future.delayed(Duration(seconds: 3)).then((value) => {
+          FirebaseAuth.instance.currentUser
+              .getIdToken()
+              .then((token) async {
+            //If get token, we print it
+            print('$token');
+            //  context.read().state = userToken;
+            // check user in firestore
+            CollectionReference userRef = FirebaseFirestore.instance.collection('User');
+            DocumentSnapshot snapshotUser = await userRef
+                .doc(FirebaseAuth.instance.currentUser.phoneNumber)
+                .get();
+            //Force reload state
+            WidgetsBinding.instance?.addPostFrameCallback((_) {
+              context.read().state = true;
+            });
+            //context.read().state = true; // tu powinno byc read(forceReload)
+            if(snapshotUser.exists) {
+              // And because user already login, we will start new screen
+              Navigator.pushNamedAndRemoveUntil(context, '/home', (route) => false);
+            }
+            else {
+
+              // if user info doesn't available, show dialog
+              var nameController = TextEditingController();
+              var addressController = TextEditingController();
+              Alert(
+                  context:context,
+                  title: 'UPDATE PROFILES',
+                  content:Column(
+                    children: [
+                      TextField(decoration: InputDecoration(
+                          icon:Icon(Icons.account_circle),
+                          labelText: 'Name'
+                      ),controller: nameController,),
+                      TextField(decoration: InputDecoration(
+                          icon:Icon(Icons.home),
+                          labelText: 'Address'
+                      ),controller: addressController,)
+                    ],
+                  ),
+                  buttons: [
+                    DialogButton(child: Text('CANCEL'), onPressed: ()=>Navigator.pop(context)),
+                    DialogButton(child: Text('UPDATE'), onPressed: (){
+                      // update to server
+                      userRef.doc(FirebaseAuth.instance.currentUser.phoneNumber)
+                          .set({
+                        'name':nameController.text,
+                        'address':addressController.text
+                      }).then((value) async {
+                        Navigator.pop(context);
+                        ScaffoldMessenger.of(scaffoldState.currentContext)
+                            .showSnackBar(SnackBar(content: Text('UPDATE PROFILES SUCCESSFULLY!')));
+                        await Future.delayed(Duration(seconds: 1), () {
+                          // And because user already login, we will start new screen
+                          Navigator.pushNamedAndRemoveUntil(context, '/home', (route) => false);
+                        });
+                      })
+                          .catchError((e) {
+                        Navigator.pop(context);
+                        ScaffoldMessenger.of(scaffoldState.currentContext)
+                            .showSnackBar(SnackBar(content: Text('$e')));
+                      });
+                    }),
+                  ]
+              ).show();
+            }
+          })
+        });
+      }
+      return FirebaseAuth.instance.currentUser != null
+          ? LOGIN_STATE.LOGGED
+          : LOGIN_STATE.NOT_LOGIN;
+  }
 }

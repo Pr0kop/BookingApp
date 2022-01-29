@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/src/widgets/framework.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-class HomePage extends ConsumerWidget {
+class HomePage extends ConsumerWidget{
   @override
   Widget build(BuildContext context, watch) {
     return Scaffold(
@@ -11,6 +11,4 @@ class HomePage extends ConsumerWidget {
       ),
     );
   }
-
-
 }
