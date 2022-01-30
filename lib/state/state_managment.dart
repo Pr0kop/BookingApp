@@ -7,3 +7,6 @@ final userLogged = StateProvider((ref) => FirebaseAuth.instance.currentUser);
 final userToken = StateProvider((ref)=>'');
 final forceReload = StateProvider((ref)=> false);
 
+final currentStep = StateProvider((ref) => 1);
+final selectedCity = StateProvider((ref)=>'');
+final selectedSalon = StateProvider((ref)=>'');

@@ -45,6 +45,7 @@ dependencies:
   rflutter_alert: any
   cloud_firestore: any
   carousel_slider: any
+  im_stepper: any
   flutter_svg: ^1.0.0
   riverpod_context: ^0.1.1
 
