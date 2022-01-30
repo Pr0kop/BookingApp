@@ -7,10 +7,9 @@ import 'package:flutter/cupertino.dart';
 
 Future<List<ImageModel>> getBanners() async {
   List<ImageModel> result = new List<ImageModel>.empty(growable: true);
-  CollectionReference bannerRef = FirebaseFirestore.instance.collection('Banner');
+  CollectionReference bannerRef = FirebaseFirestore.instance.collection('Bannery');
   QuerySnapshot snapshot = await bannerRef.get();
   snapshot.docs.forEach((element) {
-  print(element);
     result.add(ImageModel.fromJson(element.data()));
   });
   return result;

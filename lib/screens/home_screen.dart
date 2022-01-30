@@ -118,7 +118,6 @@ class HomePage extends ConsumerWidget{
                   return Center(child: CircularProgressIndicator(),);
                 else{
                   var banners = snapshot.data as List<ImageModel>;
-                  print("dkdkdkghjshfdjksdhfdjkdfyFGHFDSFHEDDDDDDDDDDDDDDDDDDdk");
                   return CarouselSlider(
                     options: CarouselOptions(
                       enlargeCenterPage: true,
