@@ -1,5 +1,6 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:first_app/model/city_model.dart';
+import 'package:first_app/model/hairdresser_model.dart';
 import 'package:first_app/model/salon_model.dart';
 
 Future<List<CityModel>> getCities() async {
@@ -17,7 +18,23 @@ Future<List<CityModel>> getCities() async {
     var salonRef = FirebaseFirestore.instance.collection('AllSalon').doc(cityName.replaceAll(' ', '')).collection('Branch');
     var snapshot = await salonRef.get();
     snapshot.docs.forEach((element) {
-      salons.add(SalonModel.fromJson(element.data()));
+      var salon = SalonModel.fromJson(element.data());
+      salon.docId = element.id;
+      salon.reference = element.reference;
+      salons.add(salon);
     });
     return salons;
   }
+
+Future<List<HairdresserModel>> getHairdressersBySalon(SalonModel salon) async {
+  var hairdressers = new List<HairdresserModel>.empty(growable: true);
+  var hairdresserRef = salon.reference.collection('Fryzjerzy');
+  var snapshot = await hairdresserRef.get();
+  snapshot.docs.forEach((element) {
+    var hairdresser = HairdresserModel.fromJson(element.data());
+    hairdresser.docId = element.id;
+    hairdresser.reference = element.reference;
+    hairdressers.add(hairdresser);
+  });
+  return hairdressers;
+}

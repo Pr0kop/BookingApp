@@ -1,10 +1,12 @@
 import 'package:first_app/cloud_firestore/all_salon_ref.dart';
 import 'package:first_app/model/city_model.dart';
+import 'package:first_app/model/hairdresser_model.dart';
 import 'package:first_app/model/salon_model.dart';
 import 'package:first_app/state/state_managment.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/src/widgets/framework.dart';
+import 'package:flutter_rating_bar/flutter_rating_bar.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:im_stepper/stepper.dart';
@@ -15,6 +17,7 @@ class BookingScreen extends ConsumerWidget {
     var step = ref.watch(currentStep.state).state;
     var cityWatch = ref.watch(selectedCity.state).state;
     var salonWatch = ref.watch(selectedSalon.state).state;
+    var hairdresserWatch = ref.watch(selectedHairdresser.state).state;
     return SafeArea(
         child: Scaffold(
           resizeToAvoidBottomInset: true,
@@ -31,7 +34,10 @@ class BookingScreen extends ConsumerWidget {
               numberStyle: TextStyle(color: Colors.white),
             ),
             //Screen
-            Expanded(child: step == 1 ? displayCityList(context, ref)  : step == 2 ? displaySalon(context, ref, ref.read(selectedCity.state).state)
+            Expanded(child: step == 1 ? displayCityList(context, ref)
+                : step == 2
+                ? displaySalon(context, ref, cityWatch.name) :
+                step == 3 ? displayHairdresser(context, ref, salonWatch)
                 : Container(),),
             Expanded(
                 child: Align(
@@ -49,8 +55,9 @@ class BookingScreen extends ConsumerWidget {
                             SizedBox(width: 30,),
                             Expanded(
                                 child: ElevatedButton(
-                                    onPressed: (step == 1 && ref.read(selectedCity.state).state == '') ||
-                                        (step == 2 && ref.read(selectedSalon.state).state == '')
+                                    onPressed: (step == 1 && ref.read(selectedCity.state).state.name == null) ||
+                                        (step == 2 && ref.read(selectedSalon.state).state.docId == null) ||
+                                        (step == 3 && ref.read(selectedHairdresser.state).state.docId == null)
                                         ? null : step == 5
                                         ? null
                                         : ()=> ref.read(currentStep.state).state++,
@@ -79,12 +86,12 @@ class BookingScreen extends ConsumerWidget {
               return  ListView.builder(
                   itemCount: cities.length,
                   itemBuilder:(context,index){
-                    return GestureDetector(onTap: ()=> ref.read(selectedCity.state).state = cities[index].name,
+                    return GestureDetector(onTap: ()=> ref.read(selectedCity.state).state = cities[index],
                     child: Card(child: ListTile(
                     leading: Icon(Icons.home_work, color: Colors.black,
                     ),
-                    trailing: ref.read(selectedCity.state).state ==
-                    cities[index].name
+                    trailing: ref.read(selectedCity.state).state.name ==
+                    cities[index]
                     ? Icon(Icons.check)
                         : null,
                     title: Text('${cities[index].name}', style: GoogleFonts.robotoMono(),),
@@ -109,16 +116,56 @@ class BookingScreen extends ConsumerWidget {
               return  ListView.builder(
                   itemCount: salons.length,
                   itemBuilder:(context,index){
-                    return GestureDetector(onTap: ()=> ref.read(selectedSalon.state).state = salons[index].name,
+                    return GestureDetector(onTap: ()=> ref.read(selectedSalon.state).state = salons[index],
                       child: Card(child: ListTile(
                         leading: Icon(Icons.home_outlined, color: Colors.black,
                         ),
-                        trailing: ref.read(selectedSalon.state).state ==
-                            salons[index].name
+                        trailing: ref.read(selectedSalon.state).state.docId ==
+                            salons[index].docId
                             ? Icon(Icons.check)
                             : null,
                         title: Text('${salons[index].name}', style: GoogleFonts.robotoMono(),),
                         subtitle: Text('${salons[index].address}', style: GoogleFonts.robotoMono(fontStyle: FontStyle.italic),),
+                      ),),);
+                  });
+          }
+
+        });
+
+  }
+
+  displayHairdresser(BuildContext context, WidgetRef ref, SalonModel salonModel) {
+    return FutureBuilder(
+        future: getHairdressersBySalon(salonModel),
+        builder: (context,snapshot){
+          if(snapshot.connectionState == ConnectionState.waiting)
+            return Center(child: CircularProgressIndicator(),);
+          else{
+            var hairdressers = snapshot.data as List<HairdresserModel>;
+            if(hairdressers == null || hairdressers.length == 0)
+              return Center(child: Text('Hairdresser list is empty'),);
+            else
+              return  ListView.builder(
+                  itemCount: hairdressers.length,
+                  itemBuilder:(context,index){
+                    return GestureDetector(onTap: ()=> ref.read(selectedHairdresser.state).state = hairdressers[index],
+                      child: Card(child: ListTile(
+                        leading: Icon(Icons.person, color: Colors.black,
+                        ),
+                        trailing: ref.read(selectedHairdresser.state).state.docId ==
+                            hairdressers[index].docId
+                            ? Icon(Icons.check)
+                            : null,
+                        title: Text('${hairdressers[index].name}', style: GoogleFonts.robotoMono(),),
+                        subtitle: RatingBar.builder(
+                          itemSize: 16,
+                          allowHalfRating: true,
+                          initialRating: hairdressers[index].rating,
+                          direction: Axis.horizontal,
+                          itemCount: 5,
+                          itemBuilder: (context,_) => Icon(Icons.star, color:Colors.amber),
+                          itemPadding: const EdgeInsets.all(4),
+                        ),
                       ),),);
                   });
           }
