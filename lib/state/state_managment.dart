@@ -5,5 +5,5 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 final userLogged = StateProvider((ref) => FirebaseAuth.instance.currentUser);
 final userToken = StateProvider((ref)=>'');
-final forceReload = StateProvider((ref)=>false);
+final forceReload = StateProvider((ref)=> false);
 

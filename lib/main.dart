@@ -19,7 +19,11 @@ Future<void> main() async{
   WidgetsFlutterBinding.ensureInitialized();
   //Firebase
   Firebase.initializeApp();
-  runApp(ProviderScope(child: MyApp()));
+  runApp(// Before
+      ProviderScope(
+          child: MyApp(),
+
+      ));
 }
 
 
@@ -65,7 +69,7 @@ class MyHomePage extends ConsumerWidget {
   GlobalKey<ScaffoldState> scaffoldState = new GlobalKey();
 
 
-  processLogin(BuildContext context) {
+  processLogin(BuildContext context, WidgetRef ref) {
     var user = FirebaseAuth.instance.currentUser;
     if(user == null) // gdy nie jest zalogowany
         {
@@ -74,7 +78,8 @@ class MyHomePage extends ConsumerWidget {
         AuthProvider.phone()
       ]).then((firebaseUser) {
         // odswiezenie stanu
-    //    context.read().state = userLogged;
+       // context.read().state = userLogged;
+        ref.read(userLogged.state).state = FirebaseAuth.instance.currentUser;
         Navigator.pushNamedAndRemoveUntil(context, '/home', (route) => false);
         }).catchError((e) {
         if(e is PlatformException)
@@ -111,7 +116,7 @@ class MyHomePage extends ConsumerWidget {
               // child: ElevatedButton(onPressed: () {  }, child: Text('Zaloguj')),
               child: FutureBuilder(
 
-                future: checkLoginState(context, false, scaffoldState),
+                future: checkLoginState(context, false, scaffoldState, ref),
 
                 builder: (context,snapshot){
                   if(snapshot.connectionState == ConnectionState.waiting)
@@ -124,7 +129,7 @@ class MyHomePage extends ConsumerWidget {
                     else{
                       //If user not login before then return button
                       return ElevatedButton.icon(
-                          onPressed: ()=> processLogin(context),
+                          onPressed: ()=> processLogin(context, ref),
                           icon: Icon(Icons.phone, color:Colors.white),
                           label: Text('Zaloguj się', style: TextStyle(color: Colors.white),),
                           style: ButtonStyle(backgroundColor: MaterialStateProperty.all(Colors.black)),
@@ -140,31 +145,29 @@ class MyHomePage extends ConsumerWidget {
     );
   }
 
-  Future<LOGIN_STATE>  checkLoginState(BuildContext context,bool fromLogin, GlobalKey<ScaffoldState> scaffoldState) async{
-      if(!context.read().state) {
-        await Future.delayed(Duration(seconds: 3)).then((value) => {
+  Future<LOGIN_STATE>  checkLoginState(BuildContext context,bool fromLogin, GlobalKey<ScaffoldState> scaffoldState, WidgetRef ref) async{
+    if(!ref.read(forceReload.state).state) {
+        await Future.delayed(Duration(seconds: fromLogin == true ? 0 : 3)).then((value) => {
           FirebaseAuth.instance.currentUser
               .getIdToken()
               .then((token) async {
             //If get token, we print it
             print('$token');
-            //  context.read().state = userToken;
+              ref.read(userToken.state).state = token;
             // check user in firestore
             CollectionReference userRef = FirebaseFirestore.instance.collection('User');
             DocumentSnapshot snapshotUser = await userRef
                 .doc(FirebaseAuth.instance.currentUser.phoneNumber)
                 .get();
             //Force reload state
-            WidgetsBinding.instance?.addPostFrameCallback((_) {
-              context.read().state = true;
-            });
-            //context.read().state = true; // tu powinno byc read(forceReload)
+             ref.read(forceReload.state).state = true;   // tu powinno byc read(forceReload)
+
             if(snapshotUser.exists) {
               // And because user already login, we will start new screen
               Navigator.pushNamedAndRemoveUntil(context, '/home', (route) => false);
             }
             else {
-
+              print('blasbdsalbdalsbddblaasdaslkdsadsajkdsakjhsakjhfakafjhkfaskjjhkfsajhk');
               // if user info doesn't available, show dialog
               var nameController = TextEditingController();
               var addressController = TextEditingController();
