@@ -1,6 +1,7 @@
 import 'package:carousel_slider/carousel_slider.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:first_app/cloud_firestore/banner_ref.dart';
+import 'package:first_app/cloud_firestore/lookbook_ref.dart';
 import 'package:first_app/cloud_firestore/user_ref.dart';
 import 'package:first_app/model/image_model.dart';
 import 'package:first_app/model/user_model.dart';
@@ -131,7 +132,27 @@ class HomePage extends ConsumerWidget{
                     ),)).toList()
                   );
                 }
-              })
+              }),
+          //lookbook
+          Padding(padding: const EdgeInsets.all(8), child: Row(children: [
+            Text('LOOKBOOK', style: GoogleFonts.robotoMono(fontSize: 24),)
+          ],),),
+          FutureBuilder(
+              future: getLookbook(),
+              builder: (context,snapshot) {
+                if(snapshot.connectionState == ConnectionState.waiting)
+                  return Center(child: CircularProgressIndicator(),);
+                else{
+                  var lookbook = snapshot.data as List<ImageModel>;
+                  return Column(
+                      children: lookbook
+                          .map((e)=> Container(padding: const EdgeInsets.all(8),child: ClipRRect(
+                        borderRadius: BorderRadius.circular(8),
+                        child: Image.network(e.image),
+                      ),)).toList(),
+                  );
+                }
+              }),
         ],
         ),
       ),
