@@ -21,7 +21,7 @@ Future<void> main() async{
   Firebase.initializeApp();
   runApp(// Before
       ProviderScope(
-          child: MyApp(),
+        child: MyApp(),
 
       ));
 }
@@ -78,10 +78,10 @@ class MyHomePage extends ConsumerWidget {
         AuthProvider.phone()
       ]).then((firebaseUser) {
         // odswiezenie stanu
-       // context.read().state = userLogged;
+        // context.read().state = userLogged;
         ref.read(userLogged.state).state = FirebaseAuth.instance.currentUser;
         Navigator.pushNamedAndRemoveUntil(context, '/home', (route) => false);
-        }).catchError((e) {
+      }).catchError((e) {
         if(e is PlatformException)
           if(e.code == FirebaseAuthUi.kUserCancelledError) {
             ScaffoldMessenger.of(scaffoldState.currentContext).showSnackBar(
@@ -90,7 +90,7 @@ class MyHomePage extends ConsumerWidget {
             ScaffoldMessenger.of(scaffoldState.currentContext).showSnackBar(
                 SnackBar(content: Text('Nieznany blad')));
           }
-       });
+      });
     }
     else // zalogowany -> przejdz na strone glowna
         {
@@ -129,10 +129,10 @@ class MyHomePage extends ConsumerWidget {
                     else{
                       //If user not login before then return button
                       return ElevatedButton.icon(
-                          onPressed: ()=> processLogin(context, ref),
-                          icon: Icon(Icons.phone, color:Colors.white),
-                          label: Text('Zaloguj się', style: TextStyle(color: Colors.white),),
-                          style: ButtonStyle(backgroundColor: MaterialStateProperty.all(Colors.black)),
+                        onPressed: ()=> processLogin(context, ref),
+                        icon: Icon(Icons.phone, color:Colors.white),
+                        label: Text('Zaloguj się', style: TextStyle(color: Colors.white),),
+                        style: ButtonStyle(backgroundColor: MaterialStateProperty.all(Colors.black)),
                       );
                     }
                   }
@@ -147,76 +147,76 @@ class MyHomePage extends ConsumerWidget {
 
   Future<LOGIN_STATE>  checkLoginState(BuildContext context,bool fromLogin, GlobalKey<ScaffoldState> scaffoldState, WidgetRef ref) async{
     if(!ref.read(forceReload.state).state) {
-        await Future.delayed(Duration(seconds: fromLogin == true ? 0 : 3)).then((value) => {
-          FirebaseAuth.instance.currentUser
-              .getIdToken()
-              .then((token) async {
-            //If get token, we print it
-            print('$token');
-              ref.read(userToken.state).state = token;
-            // check user in firestore
-            CollectionReference userRef = FirebaseFirestore.instance.collection('User');
-            DocumentSnapshot snapshotUser = await userRef
-                .doc(FirebaseAuth.instance.currentUser.phoneNumber)
-                .get();
-            //Force reload state
-             ref.read(forceReload.state).state = true;   // tu powinno byc read(forceReload)
+      await Future.delayed(Duration(seconds: fromLogin == true ? 0 : 3)).then((value) => {
+        FirebaseAuth.instance.currentUser
+            .getIdToken()
+            .then((token) async {
+          //If get token, we print it
+          print('$token');
+          ref.read(userToken.state).state = token;
+          // check user in firestore
+          CollectionReference userRef = FirebaseFirestore.instance.collection('User');
+          DocumentSnapshot snapshotUser = await userRef
+              .doc(FirebaseAuth.instance.currentUser.phoneNumber)
+              .get();
+          //Force reload state
+          ref.read(forceReload.state).state = true;   // tu powinno byc read(forceReload)
 
-            if(snapshotUser.exists) {
-              // And because user already login, we will start new screen
-              Navigator.pushNamedAndRemoveUntil(context, '/home', (route) => false);
-            }
-            else {
-              print('blasbdsalbdalsbddblaasdaslkdsadsajkdsakjhsakjhfakafjhkfaskjjhkfsajhk');
-              // if user info doesn't available, show dialog
-              var nameController = TextEditingController();
-              var addressController = TextEditingController();
-              Alert(
-                  context:context,
-                  title: 'UPDATE PROFILES',
-                  content:Column(
-                    children: [
-                      TextField(decoration: InputDecoration(
-                          icon:Icon(Icons.account_circle),
-                          labelText: 'Name'
-                      ),controller: nameController,),
-                      TextField(decoration: InputDecoration(
-                          icon:Icon(Icons.home),
-                          labelText: 'Address'
-                      ),controller: addressController,)
-                    ],
-                  ),
-                  buttons: [
-                    DialogButton(child: Text('CANCEL'), onPressed: ()=>Navigator.pop(context)),
-                    DialogButton(child: Text('UPDATE'), onPressed: (){
-                      // update to server
-                      userRef.doc(FirebaseAuth.instance.currentUser.phoneNumber)
-                          .set({
-                        'name':nameController.text,
-                        'address':addressController.text
-                      }).then((value) async {
-                        Navigator.pop(context);
-                        ScaffoldMessenger.of(scaffoldState.currentContext)
-                            .showSnackBar(SnackBar(content: Text('UPDATE PROFILES SUCCESSFULLY!')));
-                        await Future.delayed(Duration(seconds: 1), () {
-                          // And because user already login, we will start new screen
-                          Navigator.pushNamedAndRemoveUntil(context, '/home', (route) => false);
-                        });
-                      })
-                          .catchError((e) {
-                        Navigator.pop(context);
-                        ScaffoldMessenger.of(scaffoldState.currentContext)
-                            .showSnackBar(SnackBar(content: Text('$e')));
+          if(snapshotUser.exists) {
+            // And because user already login, we will start new screen
+            Navigator.pushNamedAndRemoveUntil(context, '/home', (route) => false);
+          }
+          else {
+            print('blasbdsalbdalsbddblaasdaslkdsadsajkdsakjhsakjhfakafjhkfaskjjhkfsajhk');
+            // if user info doesn't available, show dialog
+            var nameController = TextEditingController();
+            var addressController = TextEditingController();
+            Alert(
+                context:context,
+                title: 'UPDATE PROFILES',
+                content:Column(
+                  children: [
+                    TextField(decoration: InputDecoration(
+                        icon:Icon(Icons.account_circle),
+                        labelText: 'Name'
+                    ),controller: nameController,),
+                    TextField(decoration: InputDecoration(
+                        icon:Icon(Icons.home),
+                        labelText: 'Address'
+                    ),controller: addressController,)
+                  ],
+                ),
+                buttons: [
+                  DialogButton(child: Text('CANCEL'), onPressed: ()=>Navigator.pop(context)),
+                  DialogButton(child: Text('UPDATE'), onPressed: (){
+                    // update to server
+                    userRef.doc(FirebaseAuth.instance.currentUser.phoneNumber)
+                        .set({
+                      'name':nameController.text,
+                      'address':addressController.text
+                    }).then((value) async {
+                      Navigator.pop(context);
+                      ScaffoldMessenger.of(scaffoldState.currentContext)
+                          .showSnackBar(SnackBar(content: Text('UPDATE PROFILES SUCCESSFULLY!')));
+                      await Future.delayed(Duration(seconds: 1), () {
+                        // And because user already login, we will start new screen
+                        Navigator.pushNamedAndRemoveUntil(context, '/home', (route) => false);
                       });
-                    }),
-                  ]
-              ).show();
-            }
-          })
-        });
-      }
-      return FirebaseAuth.instance.currentUser != null
-          ? LOGIN_STATE.LOGGED
-          : LOGIN_STATE.NOT_LOGIN;
+                    })
+                        .catchError((e) {
+                      Navigator.pop(context);
+                      ScaffoldMessenger.of(scaffoldState.currentContext)
+                          .showSnackBar(SnackBar(content: Text('$e')));
+                    });
+                  }),
+                ]
+            ).show();
+          }
+        })
+      });
+    }
+    return FirebaseAuth.instance.currentUser != null
+        ? LOGIN_STATE.LOGGED
+        : LOGIN_STATE.NOT_LOGIN;
   }
 }
