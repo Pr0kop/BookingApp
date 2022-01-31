@@ -3,6 +3,7 @@ import 'package:first_app/model/city_model.dart';
 import 'package:first_app/model/hairdresser_model.dart';
 import 'package:first_app/model/salon_model.dart';
 import 'package:first_app/state/state_managment.dart';
+import 'package:first_app/utils/utils.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/src/widgets/framework.dart';
@@ -21,6 +22,8 @@ class BookingScreen extends ConsumerWidget {
     var salonWatch = ref.watch(selectedSalon.state).state;
     var hairdresserWatch = ref.watch(selectedHairdresser.state).state;
     var dateWatch = ref.watch(selectedDate.state).state;
+    var timeWatch = ref.watch(selectedTime.state).state;
+
     return SafeArea(
         child: Scaffold(
           resizeToAvoidBottomInset: true,
@@ -37,7 +40,9 @@ class BookingScreen extends ConsumerWidget {
               numberStyle: TextStyle(color: Colors.white),
             ),
             //Screen
-            Expanded(child: step == 1 ? displayCityList(context, ref)
+            Expanded(
+              flex: 10,
+              child: step == 1 ? displayCityList(context, ref)
                 : step == 2
                 ? displaySalon(context, ref, cityWatch.name) :
                 step == 3 ? displayHairdresser(context, ref, salonWatch) : step == 4 ? displayTimeSlot(context, ref, hairdresserWatch)
@@ -212,6 +217,29 @@ class BookingScreen extends ConsumerWidget {
               ),)
             ],
           )
+        ),
+        Expanded(
+          child: GridView.builder(
+              itemCount: TIME_SLOT.length,
+              gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(crossAxisCount: 3),
+            itemBuilder: (context,index)=> GestureDetector(
+              onTap: (){
+                ref.read(selectedTime.state).state = TIME_SLOT.elementAt(index);
+              },
+              child: Card(
+                color: ref.read(selectedTime.state).state == TIME_SLOT.elementAt(index) ? Colors.white54 : Colors.white,
+                child: GridTile(
+                  child: Center(
+                    child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.center,
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      Text('${TIME_SLOT.elementAt(index)}'),
+                      Text('Dostępne')
+                    ],),),
+                  header: ref.read(selectedTime.state).state == TIME_SLOT.elementAt(index) ? Icon(Icons.check):null,
+                ),),
+            )),
         )
       ]
     );

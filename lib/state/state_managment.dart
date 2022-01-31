@@ -17,3 +17,4 @@ final selectedSalon = StateProvider((ref)=>SalonModel());
 final selectedHairdresser = StateProvider((ref)=>HairdresserModel());
 final selectedDate = StateProvider ((ref)=> DateTime.now());
 final selectedTimeSlot = StateProvider ((ref)=> -1);
+final selectedTime = StateProvider ((ref)=> '');
