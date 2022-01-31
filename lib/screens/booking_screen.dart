@@ -6,10 +6,12 @@ import 'package:first_app/state/state_managment.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/src/widgets/framework.dart';
+import 'package:flutter_datetime_picker/flutter_datetime_picker.dart';
 import 'package:flutter_rating_bar/flutter_rating_bar.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:im_stepper/stepper.dart';
+import 'package:intl/intl.dart';
 import 'package:provider/src/provider.dart';
 class BookingScreen extends ConsumerWidget {
   @override
@@ -18,6 +20,7 @@ class BookingScreen extends ConsumerWidget {
     var cityWatch = ref.watch(selectedCity.state).state;
     var salonWatch = ref.watch(selectedSalon.state).state;
     var hairdresserWatch = ref.watch(selectedHairdresser.state).state;
+    var dateWatch = ref.watch(selectedDate.state).state;
     return SafeArea(
         child: Scaffold(
           resizeToAvoidBottomInset: true,
@@ -37,7 +40,7 @@ class BookingScreen extends ConsumerWidget {
             Expanded(child: step == 1 ? displayCityList(context, ref)
                 : step == 2
                 ? displaySalon(context, ref, cityWatch.name) :
-                step == 3 ? displayHairdresser(context, ref, salonWatch)
+                step == 3 ? displayHairdresser(context, ref, salonWatch) : step == 4 ? displayTimeSlot(context, ref, hairdresserWatch)
                 : Container(),),
             Expanded(
                 child: Align(
@@ -57,7 +60,8 @@ class BookingScreen extends ConsumerWidget {
                                 child: ElevatedButton(
                                     onPressed: (step == 1 && ref.read(selectedCity.state).state.name == null) ||
                                         (step == 2 && ref.read(selectedSalon.state).state.docId == null) ||
-                                        (step == 3 && ref.read(selectedHairdresser.state).state.docId == null)
+                                        (step == 3 && ref.read(selectedHairdresser.state).state.docId == null) ||
+                                        (step == 4 && ref.read(selectedTimeSlot.state).state == -1)
                                         ? null : step == 5
                                         ? null
                                         : ()=> ref.read(currentStep.state).state++,
@@ -163,6 +167,7 @@ class BookingScreen extends ConsumerWidget {
                           initialRating: hairdressers[index].rating,
                           direction: Axis.horizontal,
                           itemCount: 5,
+                          onRatingUpdate: (value){},
                           itemBuilder: (context,_) => Icon(Icons.star, color:Colors.amber),
                           itemPadding: const EdgeInsets.all(4),
                         ),
@@ -171,6 +176,46 @@ class BookingScreen extends ConsumerWidget {
           }
 
         });
+
+  }
+
+  displayTimeSlot(BuildContext context, WidgetRef ref, HairdresserModel hairdresserModel) {
+
+    var now = ref.read(selectedDate.state).state;
+    return Column(
+      children: [
+        Container(
+          color: Color(0xFF008577),
+          child: Row(
+            crossAxisAlignment: CrossAxisAlignment.center,
+            children: [
+              Expanded(child:
+              Center(child: Padding(padding: const EdgeInsets.all(12), child: Column(children: [
+                Text('${DateFormat.MMMM().format(now)}',
+                  style: GoogleFonts.robotoMono(color: Colors.white54),),
+                Text('${now.day}', style: GoogleFonts.robotoMono(color:Colors.white, fontWeight: FontWeight.bold, fontSize: 22),
+                ),
+                Text('${DateFormat.EEEE().format(now)}',
+                  style: GoogleFonts.robotoMono(color: Colors.white54),),
+              ],),),),),
+              GestureDetector(onTap: (){
+                DatePicker.showDatePicker(context,showTitleActions: true,
+                minTime: now,
+                maxTime: now.add(Duration(days: 31)),
+                onConfirm: (date) => ref.read(selectedDate.state).state = date); // next time you can choose is 31 days next
+              }, child: Padding(
+                padding: const EdgeInsets.all(8),
+                child: Align(
+                  alignment: Alignment.centerRight,
+                  child: Icon(Icons.calendar_today, color:Colors.white),
+                ),
+              ),)
+            ],
+          )
+        )
+      ]
+    );
+
 
   }
 }
