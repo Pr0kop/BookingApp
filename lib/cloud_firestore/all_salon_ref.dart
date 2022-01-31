@@ -38,3 +38,14 @@ Future<List<HairdresserModel>> getHairdressersBySalon(SalonModel salon) async {
   });
   return hairdressers;
 }
+
+Future<List<int>> getTimeSlotOfHairdresser(HairdresserModel hairdresserModel, String date) async {
+
+  List<int> result = new List<int>.empty(growable:true);
+  var bookingRef = hairdresserModel.reference.collection(date);
+  QuerySnapshot snapshot = await bookingRef.get();
+  snapshot.docs.forEach((element) {
+    result.add(int.parse(element.id));
+  });
+  return result;
+}
