@@ -4,6 +4,7 @@ import 'package:first_app/cloud_firestore/banner_ref.dart';
 import 'package:first_app/cloud_firestore/user_ref.dart';
 import 'package:first_app/model/image_model.dart';
 import 'package:first_app/model/user_model.dart';
+import 'package:first_app/state/state_managment.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/src/widgets/framework.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -37,7 +38,8 @@ class HomePage extends ConsumerWidget{
                         maxRadius: 30,
                         backgroundColor: Colors.black,),
                       SizedBox(width: 30,),
-                      Expanded(child: Column(
+                      Expanded(
+                          child: Column(
                         children: [
                           Text(
                             '${userModel.name}',
@@ -54,7 +56,12 @@ class HomePage extends ConsumerWidget{
                             ),)
                         ],
                         crossAxisAlignment: CrossAxisAlignment.start,
-                      ))
+                      )),
+
+                      ref.read(userInformation.state).state.isStaff ?
+                          IconButton(icon: Icon(Icons.admin_panel_settings,
+                          color: Colors.white), onPressed: () => Navigator.of(context).pushNamed('/staffHome'),) : Container()
+
                     ],),
                   );
                 }
