@@ -49,6 +49,8 @@ dependencies:
   flutter_rating_bar: any
   intl: any
   flutter_datetime_picker: any
+  ntp: any
+  add_2_calendar: any
   flutter_svg: ^1.0.0
   riverpod_context: ^0.1.1
 

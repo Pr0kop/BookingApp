@@ -15,6 +15,8 @@ Future<List<CityModel>> getCities() async {
 
   Future<List<SalonModel>> getSalonByCity(String cityName) async {
     var salons = new List<SalonModel>.empty(growable: true);
+    if(cityName == 'Białystok')
+      cityName = 'Bialystok';
     var salonRef = FirebaseFirestore.instance.collection('AllSalon').doc(cityName.replaceAll(' ', '')).collection('Branch');
     var snapshot = await salonRef.get();
     snapshot.docs.forEach((element) {
@@ -28,7 +30,7 @@ Future<List<CityModel>> getCities() async {
 
 Future<List<HairdresserModel>> getHairdressersBySalon(SalonModel salon) async {
   var hairdressers = new List<HairdresserModel>.empty(growable: true);
-  var hairdresserRef = salon.reference.collection('Fryzjerzy');
+  var hairdresserRef = salon.reference.collection('Fryzjer');
   var snapshot = await hairdresserRef.get();
   snapshot.docs.forEach((element) {
     var hairdresser = HairdresserModel.fromJson(element.data());

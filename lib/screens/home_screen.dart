@@ -95,6 +95,7 @@ class HomePage extends ConsumerWidget{
                 ),
               ),
               Expanded(
+                child: GestureDetector(onTap: () => Navigator.pushNamed(context, '/history'),
                 child: Container(
                   child: Padding(
                     padding: const EdgeInsets.all(8),
@@ -106,7 +107,7 @@ class HomePage extends ConsumerWidget{
                       ],
                     ),
                   ),
-                ),
+                ),),
               )
             ],
           ),

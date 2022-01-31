@@ -1,5 +1,8 @@
+import 'package:add_2_calendar/add_2_calendar.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:first_app/cloud_firestore/all_salon_ref.dart';
+import 'package:first_app/model/booking_model.dart';
 import 'package:first_app/model/city_model.dart';
 import 'package:first_app/model/hairdresser_model.dart';
 import 'package:first_app/model/salon_model.dart';
@@ -32,6 +35,7 @@ class BookingScreen extends ConsumerWidget {
     return SafeArea(
         child: Scaffold(
           key:scaffoldKey,
+          appBar: AppBar(title: Text('Booking'),),
           resizeToAvoidBottomInset: true,
           backgroundColor: Color(0XFFFDF9EE),
           body: Column(children:[
@@ -107,7 +111,7 @@ class BookingScreen extends ConsumerWidget {
                     leading: Icon(Icons.home_work, color: Colors.black,
                     ),
                     trailing: ref.read(selectedCity.state).state.name ==
-                    cities[index]
+                    cities[index].name
                     ? Icon(Icons.check)
                         : null,
                     title: Text('${cities[index].name}', style: GoogleFonts.robotoMono(),),
@@ -119,6 +123,7 @@ class BookingScreen extends ConsumerWidget {
   }
 
   displaySalon(BuildContext context, WidgetRef ref, String cityName) {
+    print(cityName);
     return FutureBuilder(
         future: getSalonByCity(cityName),
         builder: (context,snapshot){
@@ -176,10 +181,10 @@ class BookingScreen extends ConsumerWidget {
                         subtitle: RatingBar.builder(
                           itemSize: 16,
                           allowHalfRating: true,
+                          ignoreGestures: true,
                           initialRating: hairdressers[index].rating,
                           direction: Axis.horizontal,
                           itemCount: 5,
-                          onRatingUpdate: (value){},
                           itemBuilder: (context,_) => Icon(Icons.star, color:Colors.amber),
                           itemPadding: const EdgeInsets.all(4),
                         ),
@@ -194,6 +199,7 @@ class BookingScreen extends ConsumerWidget {
   displayTimeSlot(BuildContext context, WidgetRef ref, HairdresserModel hairdresserModel) {
 
     var now = ref.read(selectedDate.state).state;
+
     return Column(
       children: [
         Container(
@@ -212,7 +218,7 @@ class BookingScreen extends ConsumerWidget {
               ],),),),),
               GestureDetector(onTap: (){
                 DatePicker.showDatePicker(context,showTitleActions: true,
-                minTime: now,
+                minTime: DateTime.now(),
                 maxTime: now.add(Duration(days: 31)),
                 onConfirm: (date) => ref.read(selectedDate.state).state = date); // next time you can choose is 31 days next
               }, child: Padding(
@@ -227,38 +233,51 @@ class BookingScreen extends ConsumerWidget {
         ),
         Expanded(
           child: FutureBuilder(
-            
-            future: getTimeSlotOfHairdresser(hairdresserModel, DateFormat('dd_MM_yyyy').format(ref.read(selectedDate.state).state)),
-            builder: (context,snapshot) {
+            future: getMaxAvailableTimeslot(ref.read(selectedDate.state).state),
+            builder: (context,snapshot){
               if(snapshot.connectionState == ConnectionState.waiting)
                 return Center(child: CircularProgressIndicator(),);
-              else {
-                var listTimeSlot = snapshot.data as List<int>;
-                return GridView.builder(
-                    itemCount: TIME_SLOT.length,
-                    gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(crossAxisCount: 3),
-                    itemBuilder: (context,index)=> GestureDetector(
-                      onTap:listTimeSlot.contains(index) ? null : (){
-                        ref.read(selectedTime.state).state = TIME_SLOT.elementAt(index);
-                        ref.read(selectedTimeSlot.state).state = index;
-                      },
-                      child: Card(
-                        color: listTimeSlot.contains(index) ? Colors.white10 : ref.read(selectedTime.state).state == TIME_SLOT.elementAt(index) ? Colors.white54 : Colors.white,
-                        child: GridTile(
-                          child: Center(
-                            child: Column(
-                              crossAxisAlignment: CrossAxisAlignment.center,
-                              mainAxisAlignment: MainAxisAlignment.center,
-                              children: [
-                                Text('${TIME_SLOT.elementAt(index)}'),
-                                Text(listTimeSlot.contains(index) ? 'Zajęte' : 'Dostępne')
-                              ],),),
-                          header: ref.read(selectedTime.state).state == TIME_SLOT.elementAt(index) ? Icon(Icons.check):null,
-                        ),),
-                    ));
-          }
+              else
+                {
+                  var maxTimeSlot = snapshot.data as int;
+                  return FutureBuilder(
 
-          },
+                    future: getTimeSlotOfHairdresser(hairdresserModel, DateFormat('dd_MM_yyyy').format(ref.read(selectedDate.state).state)),
+                    builder: (context,snapshot) {
+                      if(snapshot.connectionState == ConnectionState.waiting)
+                        return Center(child: CircularProgressIndicator(),);
+                      else {
+                        var listTimeSlot = snapshot.data as List<int>;
+                        return GridView.builder(
+                            itemCount: TIME_SLOT.length,
+                            gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(crossAxisCount: 3),
+                            itemBuilder: (context,index)=> GestureDetector(
+                              onTap: maxTimeSlot > index || listTimeSlot.contains(index) ? null : (){
+                                ref.read(selectedTime.state).state = TIME_SLOT.elementAt(index);
+                                ref.read(selectedTimeSlot.state).state = index;
+                              },
+                              child: Card(
+                                color: listTimeSlot.contains(index) ? Colors.white10 : maxTimeSlot > index ? Colors.white60 : ref.read(selectedTime.state).state == TIME_SLOT.elementAt(index) ? Colors.white54 : Colors.white,
+                                child: GridTile(
+                                  child: Center(
+                                    child: Column(
+                                      crossAxisAlignment: CrossAxisAlignment.center,
+                                      mainAxisAlignment: MainAxisAlignment.center,
+                                      children: [
+                                        Text('${TIME_SLOT.elementAt(index)}'),
+                                        Text( listTimeSlot.contains(index) ? 'Zajęte' :
+                                        maxTimeSlot > index ? 'Niedostępne'
+                                            : 'Dostępne')
+                                      ],),),
+                                  header: ref.read(selectedTime.state).state == TIME_SLOT.elementAt(index) ? Icon(Icons.check):null,
+                                ),),
+                            ));
+                      }
+
+                    },
+                  );
+                }
+            }
           ),
         )
       ]
@@ -280,44 +299,87 @@ class BookingScreen extends ConsumerWidget {
       ref.read(selectedDate.state).state.day,
       hour,
       minutes
-    ).millisecond;
+    ).millisecondsSinceEpoch;
+    //Create booking Model
+    var bookingModel = BookingModel(
+    hairdresserId : ref.read(selectedHairdresser.state).state.docId,
+    hairdresserName : ref.read(selectedHairdresser.state).state.name,
+    cityBook : ref.read(selectedCity.state).state.name,
+    customerName : ref.read(userInformation.state).state.name,
+    customerPhone : FirebaseAuth.instance.currentUser.phoneNumber,
+    done : false,
+    salonAddress : ref.read(selectedSalon.state).state.address,
+    salonId : ref.read(selectedSalon.state).state.docId,
+    salonName : ref.read(selectedSalon.state).state.name,
+    slot : ref.read(selectedTimeSlot.state).state,
+    timeStamp : timeStamp,
+    time :
+    '${ref.read(selectedTime.state).state} - ${DateFormat('dd/MM/yyyy').format(ref.read(selectedDate.state).state)}'
 
-    var submitData = {
-      'hairdresserId': ref.read(selectedHairdresser.state).state.docId,
-      'hairdresserName': ref.read(selectedHairdresser.state).state.name,
-      'cityBook': ref.read(selectedCity.state).state.name,
-      'customerName': ref.read(userInformation.state).state.name,
-      'customerPhone': FirebaseAuth.instance.currentUser.phoneNumber,
-      'done':false,
-      'salonAddress': ref.read(selectedSalon.state).state.address,
-      'salonId': ref.read(selectedSalon.state).state.docId,
-      'salonName': ref.read(selectedSalon.state).state.name,
-      'slot': ref.read(selectedTimeSlot.state).state,
-      'timeStamp': timeStamp,
-      'time':
-        '${ref.read(selectedTime.state).state} - ${DateFormat('dd/MM/yyyy').format(ref.read(selectedDate.state).state)}'
-
-
-
-      };
+    );
     //submit on firestore
 
-    ref.read(selectedHairdresser.state).state.reference.collection('${DateFormat('dd_MM_yyyy').format(ref.read(selectedDate.state).state)}')
-    .doc(ref.read(selectedTimeSlot.state).state.toString())
-    .set(submitData)
-    .then((value) {
+    var batch = FirebaseFirestore.instance.batch();
+
+    DocumentReference hairdresserBooking = ref
+        .read(selectedHairdresser.state)
+        .state
+        .reference
+        .collection(
+        '${DateFormat('dd_MM_yyyy').format(ref.read(selectedDate.state).state)}')
+        .doc(ref.read(selectedTimeSlot.state).state.toString());
+
+    DocumentReference userBooking = FirebaseFirestore.instance.collection('User')
+    .doc(FirebaseAuth.instance.currentUser.phoneNumber)
+    .collection('Booking_${FirebaseAuth.instance.currentUser.uid}')
+    .doc();
+
+    batch.set(hairdresserBooking, bookingModel.toJson());
+    batch.set(userBooking, bookingModel.toJson());
+    batch.commit().then((value) {
+
       Navigator.of(context).pop();
       ScaffoldMessenger.of(scaffoldKey.currentContext)
-    .showSnackBar(SnackBar(content: Text('Zarezerwowano pomyślnie'),));
+          .showSnackBar(SnackBar(content: Text('Zarezerwowano pomyślnie'),));
+
+      //Event creation
+      final event = Event(
+          title: 'Wizyta u Fryzjera',
+          description: 'Wizyta fryzjerska ${ref.read(selectedTime.state).state} - '
+              '${DateFormat('dd/MM/yyyy').format(ref.read(selectedDate.state).state)}',
+          location: '${ref.read(selectedSalon.state).state.address}',
+          startDate: DateTime(
+              ref.read(selectedDate.state).state.year,
+              ref.read(selectedDate.state).state.month,
+              ref.read(selectedDate.state).state.day,
+              hour,
+              minutes
+          ),
+          endDate: DateTime(
+              ref.read(selectedDate.state).state.year,
+              ref.read(selectedDate.state).state.month,
+              ref.read(selectedDate.state).state.day,
+              hour,
+              minutes+30
+          ),
+          iosParams: IOSParams(reminder: Duration (minutes: 30)),
+          androidParams: AndroidParams (emailInvites: [])
+      );
+      Add2Calendar.addEvent2Cal(event).then((value) {
+
+      });
+      // Reset value
+      ref.read(selectedDate.state).state = DateTime.now();
+      ref.read(selectedHairdresser.state).state = HairdresserModel();
+      ref.read(selectedCity.state).state = CityModel();
+      ref.read(selectedSalon.state).state = SalonModel();
+      ref.read(currentStep.state).state = 1;
+      ref.read(selectedTime.state).state = '';
+      ref.read(selectedTimeSlot.state).state = -1;
     });
-  // Reset value
-    ref.read(selectedDate.state).state = DateTime.now();
-    ref.read(selectedHairdresser.state).state = HairdresserModel();
-    ref.read(selectedCity.state).state = CityModel();
-    ref.read(selectedSalon.state).state = SalonModel();
-    ref.read(currentStep.state).state = 1;
-    ref.read(selectedTime.state).state = '';
-    ref.read(selectedTimeSlot.state).state = -1;
+
+
+
   }
 
   displayConfirm(BuildContext context, WidgetRef ref) {
