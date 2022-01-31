@@ -226,28 +226,40 @@ class BookingScreen extends ConsumerWidget {
           )
         ),
         Expanded(
-          child: GridView.builder(
-              itemCount: TIME_SLOT.length,
-              gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(crossAxisCount: 3),
-            itemBuilder: (context,index)=> GestureDetector(
-              onTap: (){
-                ref.read(selectedTime.state).state = TIME_SLOT.elementAt(index);
-                ref.read(selectedTimeSlot.state).state = index;
-              },
-              child: Card(
-                color: ref.read(selectedTime.state).state == TIME_SLOT.elementAt(index) ? Colors.white54 : Colors.white,
-                child: GridTile(
-                  child: Center(
-                    child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.center,
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      Text('${TIME_SLOT.elementAt(index)}'),
-                      Text('Dostępne')
-                    ],),),
-                  header: ref.read(selectedTime.state).state == TIME_SLOT.elementAt(index) ? Icon(Icons.check):null,
-                ),),
-            )),
+          child: FutureBuilder(
+            
+            future: getTimeSlotOfHairdresser(hairdresserModel, DateFormat('dd_MM_yyyy').format(ref.read(selectedDate.state).state)),
+            builder: (context,snapshot) {
+              if(snapshot.connectionState == ConnectionState.waiting)
+                return Center(child: CircularProgressIndicator(),);
+              else {
+                var listTimeSlot = snapshot.data as List<int>;
+                return GridView.builder(
+                    itemCount: TIME_SLOT.length,
+                    gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(crossAxisCount: 3),
+                    itemBuilder: (context,index)=> GestureDetector(
+                      onTap:listTimeSlot.contains(index) ? null : (){
+                        ref.read(selectedTime.state).state = TIME_SLOT.elementAt(index);
+                        ref.read(selectedTimeSlot.state).state = index;
+                      },
+                      child: Card(
+                        color: listTimeSlot.contains(index) ? Colors.white10 : ref.read(selectedTime.state).state == TIME_SLOT.elementAt(index) ? Colors.white54 : Colors.white,
+                        child: GridTile(
+                          child: Center(
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.center,
+                              mainAxisAlignment: MainAxisAlignment.center,
+                              children: [
+                                Text('${TIME_SLOT.elementAt(index)}'),
+                                Text(listTimeSlot.contains(index) ? 'Zajęte' : 'Dostępne')
+                              ],),),
+                          header: ref.read(selectedTime.state).state == TIME_SLOT.elementAt(index) ? Icon(Icons.check):null,
+                        ),),
+                    ));
+          }
+
+          },
+          ),
         )
       ]
     );
@@ -257,12 +269,17 @@ class BookingScreen extends ConsumerWidget {
 
   confirmBooking(BuildContext context, WidgetRef ref) {
 
+    var hour = ref.read(selectedTime.state).state.length <= 10 ? int.parse(ref.read(selectedTime.state).state.split(':')[0].substring(0,1)) :
+    int.parse(ref.read(selectedTime.state).state.split(':')[0].substring(0,2));
+
+    var minutes =  ref.read(selectedTime.state).state.length <= 10 ? int.parse(ref.read(selectedTime.state).state.split(':')[1].substring(0,1)) :
+    int.parse(ref.read(selectedTime.state).state.split(':')[1].substring(0,2));
     var timeStamp = DateTime (
       ref.read(selectedDate.state).state.year,
       ref.read(selectedDate.state).state.month,
       ref.read(selectedDate.state).state.day,
-      int.parse(ref.read(selectedTime.state).state.split(':')[0].substring(0,2)), // godzinky
-      int.parse(ref.read(selectedTime.state).state.split(':')[1].substring(0,2)), //minutky
+      hour,
+      minutes
     ).millisecond;
 
     var submitData = {
