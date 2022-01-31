@@ -11,7 +11,7 @@ import 'package:google_fonts/google_fonts.dart';
 
 class HomePage extends ConsumerWidget{
   @override
-  Widget build(BuildContext context, watch) {
+  Widget build(BuildContext context, ref) {
     return SafeArea(child: Scaffold(
       resizeToAvoidBottomInset: true,
       backgroundColor: Color(0xFFDFDFDF),
@@ -19,8 +19,7 @@ class HomePage extends ConsumerWidget{
         child: Column(children: [
           //user profile
           FutureBuilder(
-              future: getUserProfiles(
-                  FirebaseAuth.instance.currentUser.phoneNumber),
+              future: getUserProfiles(context, ref, FirebaseAuth.instance.currentUser.phoneNumber),
               builder: (context, snapshot) {
                 if (snapshot.connectionState == ConnectionState.waiting)
                   return Center(child: CircularProgressIndicator(),);
