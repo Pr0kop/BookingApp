@@ -15,3 +15,5 @@ final currentStep = StateProvider((ref) => 1);
 final selectedCity = StateProvider((ref)=>CityModel());
 final selectedSalon = StateProvider((ref)=>SalonModel());
 final selectedHairdresser = StateProvider((ref)=>HairdresserModel());
+final selectedDate = StateProvider ((ref)=> DateTime.now());
+final selectedTimeSlot = StateProvider ((ref)=> -1);
