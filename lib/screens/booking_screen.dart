@@ -305,6 +305,7 @@ class BookingScreen extends ConsumerWidget {
     hairdresserId : ref.read(selectedHairdresser.state).state.docId,
     hairdresserName : ref.read(selectedHairdresser.state).state.name,
     cityBook : ref.read(selectedCity.state).state.name,
+    customerId: FirebaseAuth.instance.currentUser.uid,
     customerName : ref.read(userInformation.state).state.name,
     customerPhone : FirebaseAuth.instance.currentUser.phoneNumber,
     done : false,
@@ -332,7 +333,8 @@ class BookingScreen extends ConsumerWidget {
     DocumentReference userBooking = FirebaseFirestore.instance.collection('User')
     .doc(FirebaseAuth.instance.currentUser.phoneNumber)
     .collection('Booking_${FirebaseAuth.instance.currentUser.uid}')
-    .doc();
+    .doc('${ref.read(selectedHairdresser.state).state.docId}_${DateFormat('dd_MM_yyyy')
+    .format(ref.read(selectedDate.state).state)}');
 
     batch.set(hairdresserBooking, bookingModel.toJson());
     batch.set(userBooking, bookingModel.toJson());
@@ -388,9 +390,9 @@ class BookingScreen extends ConsumerWidget {
       mainAxisAlignment: MainAxisAlignment.center,
       crossAxisAlignment: CrossAxisAlignment.center,
       children: [
-        Expanded(child: Padding(padding: const EdgeInsets.all(24),
+        Expanded(flex: 1, child: Padding(padding: const EdgeInsets.all(24),
           child: Image.asset('assets/images/logo.jpg'),),),
-        Expanded(child: Container(
+        Expanded(flex: 3, child: Container(
           width: MediaQuery.of(context).size.width,
           child: Card(child: Padding(padding: const EdgeInsets.all(16), child:
             Column(
@@ -427,10 +429,11 @@ class BookingScreen extends ConsumerWidget {
                   Text('${ref.read(selectedSalon.state).state.address}'.toUpperCase(),
                     style: GoogleFonts.robotoMono(),)
                 ]),
+                SizedBox(height: 8,),
                 ElevatedButton(onPressed: () => confirmBooking(context, ref),
-                    child: Text('Potwierdź'),
-                    style: ButtonStyle(
-                        backgroundColor: MaterialStateProperty.all(Colors.black26)),
+                  child: Text('Potwierdź'),
+                  style: ButtonStyle(
+                      backgroundColor: MaterialStateProperty.all(Colors.black26)),
                 )
               ], )
         ))))

@@ -51,6 +51,7 @@ dependencies:
   flutter_datetime_picker: any
   ntp: any
   add_2_calendar: any
+  chips_choice: any
   flutter_svg: ^1.0.0
   riverpod_context: ^0.1.1
 

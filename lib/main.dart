@@ -4,7 +4,9 @@ import 'package:firebase_auth_ui/firebase_auth_ui.dart';
 import 'package:firebase_auth_ui/providers.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:first_app/screens/booking_screen.dart';
+import 'package:first_app/screens/done_services_screens.dart';
 import 'package:first_app/screens/home_screen.dart';
+import 'package:first_app/screens/staff_home_screen.dart';
 import 'package:first_app/screens/user_history_screen.dart';
 import 'package:first_app/utils/utils.dart';
 import 'package:flutter/services.dart';
@@ -43,6 +45,18 @@ class MyApp extends StatelessWidget {
             return PageTransition(
                 settings: settings,
                 child: HomePage(),
+                type: PageTransitionType.fade);
+            break;
+          case '/staffHome':
+            return PageTransition(
+                settings: settings,
+                child: StaffHome(),
+                type: PageTransitionType.fade);
+            break;
+          case '/doneService':
+            return PageTransition(
+                settings: settings,
+                child: DoneService(),
                 type: PageTransitionType.fade);
             break;
           case '/history':
