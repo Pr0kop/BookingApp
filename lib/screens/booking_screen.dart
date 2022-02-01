@@ -388,9 +388,9 @@ class BookingScreen extends ConsumerWidget {
       mainAxisAlignment: MainAxisAlignment.center,
       crossAxisAlignment: CrossAxisAlignment.center,
       children: [
-        Expanded(child: Padding(padding: const EdgeInsets.all(24),
+        Expanded(flex: 1, child: Padding(padding: const EdgeInsets.all(24),
           child: Image.asset('assets/images/logo.jpg'),),),
-        Expanded(child: Container(
+        Expanded(flex: 3, child: Container(
           width: MediaQuery.of(context).size.width,
           child: Card(child: Padding(padding: const EdgeInsets.all(16), child:
             Column(
@@ -427,10 +427,11 @@ class BookingScreen extends ConsumerWidget {
                   Text('${ref.read(selectedSalon.state).state.address}'.toUpperCase(),
                     style: GoogleFonts.robotoMono(),)
                 ]),
+                SizedBox(height: 8,),
                 ElevatedButton(onPressed: () => confirmBooking(context, ref),
-                    child: Text('Potwierdź'),
-                    style: ButtonStyle(
-                        backgroundColor: MaterialStateProperty.all(Colors.black26)),
+                  child: Text('Potwierdź'),
+                  style: ButtonStyle(
+                      backgroundColor: MaterialStateProperty.all(Colors.black26)),
                 )
               ], )
         ))))

@@ -217,10 +217,9 @@ class StaffHome extends ConsumerWidget{
                               itemCount: TIME_SLOT.length,
                               gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(crossAxisCount: 3),
                               itemBuilder: (context,index)=> GestureDetector(
-                                onTap: maxTimeSlot > index || listTimeSlot.contains(index) ? null : (){
-                                  ref.read(selectedTime.state).state = TIME_SLOT.elementAt(index);
-                                  //ref.read(selectedTimeSlot.state).state = index;
-                                },
+                                onTap:
+                                    !listTimeSlot.contains(index) ? null : () => processDoneServices(context, ref, index),
+
                                 child: Card(
                                   color: listTimeSlot.contains(index) ? Colors.white10 : maxTimeSlot > index ? Colors.white60 : ref.read(selectedTime.state).state == TIME_SLOT.elementAt(index) ? Colors.white54 : Colors.white,
                                   child: GridTile(
@@ -247,5 +246,11 @@ class StaffHome extends ConsumerWidget{
           )
         ]
     );
+  }
+
+  processDoneServices(BuildContext context, WidgetRef ref, int index) {
+    ref.read(selectedTimeSlot.state).state = index;
+    Navigator.of(context).pushNamed('/doneService');
+
   }
 }
