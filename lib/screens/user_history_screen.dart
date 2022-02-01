@@ -119,7 +119,9 @@ class UserHistory extends ConsumerWidget {
                                   ],
                                 ),
                               ),
-                              GestureDetector(onTap: isExpired ? null : (){
+                              GestureDetector(onTap: (userBookings[index].done || isExpired)
+                              ? null
+                                : (){
 
                                 Alert(
                                     context:context,

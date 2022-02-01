@@ -1,5 +1,6 @@
 import 'package:carousel_slider/carousel_slider.dart';
 import 'package:chips_choice/chips_choice.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:first_app/cloud_firestore/all_salon_ref.dart';
 import 'package:first_app/cloud_firestore/banner_ref.dart';
@@ -22,6 +23,7 @@ import 'package:google_fonts/google_fonts.dart';
 import 'package:intl/intl.dart';
 
 class DoneService extends ConsumerWidget{
+  GlobalKey<ScaffoldState> scaffoldKey = GlobalKey();
   @override
   Widget build(BuildContext context, ref) {
     //chip choices nie trzyma stanu, wiec trzeba wyczyscic servicesSelected
@@ -33,6 +35,7 @@ class DoneService extends ConsumerWidget{
     // var selectTimeWatch = ref.watch(selectedTime.state).state;
 
     return SafeArea(child: Scaffold(
+      key:scaffoldKey,
       resizeToAvoidBottomInset: true,
       backgroundColor: Color(0xFFDFDFDF),
       appBar: AppBar(
@@ -70,14 +73,17 @@ class DoneService extends ConsumerWidget{
                           )
                         ]),
                         Divider(thickness: 2,),
-                        Row(children: [
+                        Row(
+                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                            children: [
                           Consumer(builder: (context,watch,_){
                             var servicesSelected = ref.watch(selectedServices.state).state;
                             var totalPrice = servicesSelected.map((item) => item.price)
                             .fold(0,(value, element) => value + element);
-                            return Text('Cena: $totalPrice zł', style: GoogleFonts.robotoMono(fontSize: 22) ,);
-                          })
-                        ])
+                            return Text('Cena: ${ref.read(selectedBooking.state).state.totalPrice == 0 ? totalPrice : ref.read(selectedBooking.state).state.totalPrice} zł', style: GoogleFonts.robotoMono(fontSize: 22) ,);
+                          }),
+                              ref.read(selectedBooking.state).state.done ? Chip(label: Text('Zakończono'),) : Container()
+                        ]),
                       ],
                     )
                   ),
@@ -113,7 +119,7 @@ class DoneService extends ConsumerWidget{
                       Container(
                         width: MediaQuery.of(context).size.width,
                         child: ElevatedButton(
-                          onPressed: servicesWatch.length > 0 ? () => finishService(context, ref) : null,
+                          onPressed: ref.read(selectedBooking.state).state.done ? null : servicesWatch.length > 0 ? () => finishService(context, ref) : null,
                           child: Text('ZAKOŃCZ', style: GoogleFonts.robotoMono(),),
                         ),
                       )
@@ -130,8 +136,32 @@ class DoneService extends ConsumerWidget{
   }
 
   finishService(BuildContext context, WidgetRef ref) {
+    var batch = FirebaseFirestore.instance.batch();
 
+    var hairdresserBook = ref.read(selectedBooking.state).state;
+    var userBook = FirebaseFirestore.instance
+        .collection('User')
+        .doc('${hairdresserBook.customerPhone}')
+        .collection('Booking_${hairdresserBook.customerId}')
+        .doc('${hairdresserBook.hairdresserId}_${DateFormat('dd_MM_yyyy').format(
+        DateTime.fromMillisecondsSinceEpoch(hairdresserBook.timeStamp))}');
 
+    Map<String, dynamic> updateDone = new Map();
+    updateDone['done'] = true;
+    updateDone['services'] = convertServices(ref.read(selectedServices.state).state);
+    updateDone['totalPrice'] = ref.read(selectedServices.state).state
+    .map((e)=>e.price).fold(0, (previousValue, element) => previousValue + element);
+
+    batch.update(userBook, updateDone);
+    batch.update(hairdresserBook.reference, updateDone);
+
+    batch.commit().then((value){
+      ScaffoldMessenger.of(scaffoldKey.currentContext)
+          .showSnackBar(SnackBar(content: Text('Process success')))
+          .closed
+          .then((v) => Navigator.of(context).pop());
+
+    });
   }
 
 

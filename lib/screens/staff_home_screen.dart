@@ -229,7 +229,8 @@ class StaffHome extends ConsumerWidget{
                                         mainAxisAlignment: MainAxisAlignment.center,
                                         children: [
                                           Text('${TIME_SLOT.elementAt(index)}'),
-                                          Text( listTimeSlot.contains(index) ? 'Zajęte' :
+                                          Text(
+                                              listTimeSlot.contains(index) ? 'Zajęte' :
                                           maxTimeSlot > index ? 'Niedostępne'
                                               : 'Dostępne')
                                         ],),),
