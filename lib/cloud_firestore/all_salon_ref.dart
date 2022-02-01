@@ -1,7 +1,12 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:first_app/model/city_model.dart';
 import 'package:first_app/model/hairdresser_model.dart';
 import 'package:first_app/model/salon_model.dart';
+import 'package:flutter/cupertino.dart';
+import 'package:first_app/state/state_managment.dart';
+import 'package:flutter_riverpod/fLutter_riverpod.dart';
+
 
 Future<List<CityModel>> getCities() async {
   var cities = new List<CityModel>.empty(growable: true);
@@ -50,4 +55,38 @@ Future<List<int>> getTimeSlotOfHairdresser(HairdresserModel hairdresserModel, St
     result.add(int.parse(element.id));
   });
   return result;
+}
+
+Future<bool> checkStaffOfThisSalon(BuildContext context, WidgetRef ref) async {
+
+  /// /AllSalon/Warszawa/Branch/2OfQtmNY72cikGHexEHq/Fryzjer/q9pmeSnolUxX7SEryW8V
+  DocumentSnapshot hairdresserSnapshot = await FirebaseFirestore.instance
+      .collection('AllSalon')
+      .doc('${ref.read(selectedCity.state).state.name}')
+      .collection('Branch')
+      .doc(ref.read(selectedSalon.state).state.docId)
+      .collection('Fryzjer')
+      .doc(FirebaseAuth.instance.currentUser.uid).get(); // porownanie uid personelu
+  return hairdresserSnapshot.exists;
+
+}
+
+Future<List<int>> getBookingSlotOfHairdresser(BuildContext context, WidgetRef ref, String date) async {
+
+  var hairdresserDocument = FirebaseFirestore.instance
+      .collection('AllSalon')
+      .doc('${ref.read(selectedCity.state).state.name}')
+      .collection('Branch')
+      .doc(ref.read(selectedSalon.state).state.docId)
+      .collection('Fryzjer')
+      .doc(FirebaseAuth.instance.currentUser.uid);
+
+  List<int> result = new List<int>.empty(growable: true);
+  var bookingRef = hairdresserDocument.collection(date);
+  QuerySnapshot snapshot = await bookingRef.get();
+  snapshot.docs.forEach((element) {
+    result.add(int.parse(element.id));
+  });
+  return result;
+
 }
