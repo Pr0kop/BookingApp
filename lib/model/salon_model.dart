@@ -1,10 +1,11 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 
 class SalonModel {
-  String name, address, docId;
+  String name ='', address = '';
+  String  docId='';
   DocumentReference reference;
 
-  SalonModel({this.name, this.address});
+  SalonModel({ this.name,  this.address});
 
   SalonModel.fromJson(Map<String,dynamic> json) {
     address = json['address'];

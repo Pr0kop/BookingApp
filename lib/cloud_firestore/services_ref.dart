@@ -14,7 +14,8 @@ Future<List<ServiceModel>> getServices (BuildContext context, WidgetRef ref) asy
       .where(ref.read(selectedSalon.state).state.docId, isEqualTo: true)
       .get();
   snapshot.docs.forEach((element) {
-    var serviceModel = ServiceModel.fromJson(element.data());
+    final data = element.data() as Map<String, dynamic>;
+    var serviceModel = ServiceModel.fromJson(data);
     serviceModel.docId = element.id;
     services.add(serviceModel);
   });

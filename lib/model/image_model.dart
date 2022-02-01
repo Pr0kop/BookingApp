@@ -1,7 +1,7 @@
 class ImageModel{
-  String image;
+  String image='';
 
-  ImageModel({this.image});
+  ImageModel({ this.image});
 
   ImageModel.fromJson(Map<String,dynamic> json) {
     image = json['image'];

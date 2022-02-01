@@ -5,12 +5,15 @@ import 'package:first_app/cloud_firestore/user_ref.dart';
 import 'package:first_app/model/image_model.dart';
 import 'package:first_app/model/user_model.dart';
 import 'package:first_app/state/state_managment.dart';
+import 'package:first_app/view_model/home/home_view_model_imp.dart';
+
 import 'package:flutter/material.dart';
 import 'package:flutter/src/widgets/framework.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:google_fonts/google_fonts.dart';
 
 class HomePage extends ConsumerWidget{
+  final homeViewModel = HomeViewModelImp();
   @override
   Widget build(BuildContext context, ref) {
     return SafeArea(child: Scaffold(
@@ -20,7 +23,7 @@ class HomePage extends ConsumerWidget{
         child: Column(children: [
           //user profile
           FutureBuilder(
-              future: getUserProfiles(context, ref, FirebaseAuth.instance.currentUser.phoneNumber),
+              future: homeViewModel.displayUserProfile(context, ref, FirebaseAuth.instance.currentUser.phoneNumber),
               builder: (context, snapshot) {
                 if (snapshot.connectionState == ConnectionState.waiting)
                   return Center(child: CircularProgressIndicator(),);
@@ -58,7 +61,7 @@ class HomePage extends ConsumerWidget{
                         crossAxisAlignment: CrossAxisAlignment.start,
                       )),
 
-                      ref.read(userInformation.state).state.isStaff ?
+                      homeViewModel.isStaff(context, ref) ?
                           IconButton(icon: Icon(Icons.admin_panel_settings,
                           color: Colors.white), onPressed: () => Navigator.of(context).pushNamed('/staffHome'),) : Container()
 
@@ -121,7 +124,7 @@ class HomePage extends ConsumerWidget{
           ),
           //Banner
           FutureBuilder(
-              future: getBanners(),
+              future: homeViewModel.displayBanner(),
               builder: (context,snapshot) {
                 if(snapshot.connectionState == ConnectionState.waiting)
                   return Center(child: CircularProgressIndicator(),);
@@ -140,7 +143,38 @@ class HomePage extends ConsumerWidget{
                     ),)).toList()
                   );
                 }
-              })
+              }),
+      Padding(
+        padding: const EdgeInsets.all(4),
+        child: Row(
+          children: [
+            Text(
+              'LookBook',
+              style: GoogleFonts.robotoMono(fontSize: 24),
+            )
+            ],
+        ),),
+          FutureBuilder(
+            future: homeViewModel.displayLookbook(),
+            builder:(context,snapshot) {
+              if (snapshot.connectionState == ConnectionState.waiting)
+                return Center(child: CircularProgressIndicator(),);
+              else {
+                var lookbook = snapshot.data as List<ImageModel>;
+                return Column(
+                  children: lookbook
+                      .map((e) =>
+                      Container(
+                          padding: const EdgeInsets.all(8),
+                          child: ClipRRect(
+                            borderRadius: BorderRadius.circular(8),
+                            child: Image.network(e.image),
+                          )
+                      ))
+                      .toList(),
+                );
+              }
+            }),
         ],
         ),
       ),

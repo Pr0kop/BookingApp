@@ -12,11 +12,12 @@ Future<UserModel> getUserProfiles(BuildContext context, WidgetRef ref, String ph
   CollectionReference userRef = FirebaseFirestore.instance.collection('User');
   DocumentSnapshot snapshot = await userRef.doc(phone).get();
   if(snapshot.exists) {
-    var userModel = UserModel.fromJson(snapshot.data());
+    final data = snapshot.data() as Map<String, dynamic>;
+    var userModel = UserModel.fromJson(data);
     ref.read(userInformation.state).state = userModel;
     return userModel;
   }
-  else return UserModel();
+  else return UserModel(name: '', address: '');
 }
 
 Future<List<BookingModel>> getUserHistory() async {

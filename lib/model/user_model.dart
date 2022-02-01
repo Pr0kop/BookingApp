@@ -1,6 +1,6 @@
 class UserModel {
-  String name, address;
-  bool isStaff;
+  String name='', address='';
+  bool isStaff = false;
 
   UserModel({this.name, this.address});
 

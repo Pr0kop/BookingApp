@@ -1,9 +1,10 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 
 class HairdresserModel {
-  String name, docId;
-  double rating;
-  int ratingTimes;
+  String name='';
+  String docId='';
+  double rating=0;
+  int ratingTimes=0;
 
   DocumentReference reference;
 

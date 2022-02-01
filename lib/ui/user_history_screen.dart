@@ -47,7 +47,6 @@ class UserHistory extends ConsumerWidget {
             var userBookings = snapshot.data as List<BookingModel>;
             print(userBookings);
             print(snapshot);
-            print(userBookings[0].slot);
             if(userBookings == null || userBookings.length == 0)
               return Center(child: Text('Cannot load booking history'),);
             else
@@ -58,14 +57,17 @@ class UserHistory extends ConsumerWidget {
                   return Center(child: CircularProgressIndicator(),);
                 else{
                   var syncTime = snapshot.data as DateTime;
-                  print(userBookings[0].timeStamp);
+                  print('time stamp');
+                  print('SyncTime');
                   print(syncTime);
+                  print('timestamp from millisecsincep');
                   print(DateTime.fromMillisecondsSinceEpoch(userBookings[0].timeStamp));
                   return  ListView.builder(
                       itemCount: userBookings.length,
                       itemBuilder:(context,index){
                         var isExpired = DateTime.fromMillisecondsSinceEpoch(userBookings[index].timeStamp)
-                            .isAfter(syncTime); // TUTAJ JEST ZMIANA  EXPIRED NA DATACH.
+                            .isBefore(syncTime); // TUTAJ JEST ZMIANA  EXPIRED NA DATACH.
+                        print(isExpired);
                         return Card (
                           elevation: 8,
                           shape: RoundedRectangleBorder (
@@ -167,6 +169,7 @@ class UserHistory extends ConsumerWidget {
 
   void cancelBooking(BuildContext context, BookingModel bookingModel, WidgetRef ref) {
     var batch = FirebaseFirestore.instance.batch();
+    print('sgdajhadsgjhdsaghjdsagjhdsa');
     var hairdresserBooking = FirebaseFirestore.instance
     .collection('AllSalon')
     .doc(bookingModel.cityBook)
@@ -176,7 +179,17 @@ class UserHistory extends ConsumerWidget {
     .doc(bookingModel.hairdresserId)
     .collection(DateFormat('dd_MM_yyyy').format(DateTime.fromMillisecondsSinceEpoch(bookingModel.timeStamp)))
     .doc(bookingModel.slot.toString());
-    var userBooking = bookingModel.reference;
+
+    var userBooking = FirebaseFirestore.instance
+    .collection('User')
+    .doc(bookingModel.customerPhone)
+    .collection('Booking_${FirebaseAuth.instance.currentUser.uid}')
+    .doc('${bookingModel.hairdresserId}_${DateFormat('dd_MM_yyyy')
+    .format(DateTime.fromMillisecondsSinceEpoch(bookingModel.timeStamp))}');
+
+
+    print(userBooking);
+    print(hairdresserBooking);
     batch.delete(userBooking);
     batch.delete(hairdresserBooking);
 
@@ -184,6 +197,7 @@ class UserHistory extends ConsumerWidget {
 
       //Refresh Data
       ref.read(deleteFlagRefresh.state).state = !ref.read(deleteFlagRefresh.state).state;
+
     });
   }
 

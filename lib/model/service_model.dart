@@ -1,7 +1,8 @@
 class ServiceModel{
-  String name, docId;
-  double price;
-  ServiceModel({this.name, this.price});
+  String name ='';
+  String docId='';
+  double price= 0;
+  ServiceModel({ this.name, this.price});
 
   ServiceModel.fromJson(Map<String, dynamic> json){
     name = json['name'];

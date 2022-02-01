@@ -13,12 +13,12 @@ final userLogged = StateProvider((ref) => FirebaseAuth.instance.currentUser);
 final userToken = StateProvider((ref)=>'');
 final forceReload = StateProvider((ref)=> false);
 
-final userInformation = StateProvider((ref)=> UserModel());
+final userInformation = StateProvider((ref)=> UserModel(address: '', name: ''));
 
 //Booking state
 final currentStep = StateProvider((ref) => 1);
-final selectedCity = StateProvider((ref)=>CityModel());
-final selectedSalon = StateProvider((ref)=>SalonModel());
+final selectedCity = StateProvider((ref)=>CityModel(name: ''));
+final selectedSalon = StateProvider((ref)=>SalonModel(address: '', name: ''));
 final selectedHairdresser = StateProvider((ref)=>HairdresserModel());
 final selectedDate = StateProvider ((ref)=> DateTime.now());
 final selectedTimeSlot = StateProvider ((ref)=> -1);
@@ -29,5 +29,22 @@ final deleteFlagRefresh = StateProvider((ref) => false);
 
 //Personel
 final staffStep = StateProvider((ref) => 1);
-final selectedBooking = StateProvider((ref) => BookingModel());
+final selectedBooking = StateProvider((ref) =>
+    BookingModel(
+    totalPrice: 0,
+    customerName: '',
+    done: false,
+    salonName: '',
+    salonId: '',
+    salonAddress: '',
+    cityBook: '',
+    timeStamp: 0,
+    time: '',
+    hairdresserId: '',
+    customerPhone: '',
+    hairdresserName: '',
+    customerId: '',
+    slot: 0));
+
+
 final selectedServices = StateProvider((ref) => List<ServiceModel>.empty(growable: true));

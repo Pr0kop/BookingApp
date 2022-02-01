@@ -10,7 +10,8 @@ Future<List<ImageModel>> getBanners() async {
   CollectionReference bannerRef = FirebaseFirestore.instance.collection('Bannery');
   QuerySnapshot snapshot = await bannerRef.get();
   snapshot.docs.forEach((element) {
-    result.add(ImageModel.fromJson(element.data()));
+    final data = element.data() as Map<String, dynamic>;
+    result.add(ImageModel.fromJson(data));
   });
   return result;
 }

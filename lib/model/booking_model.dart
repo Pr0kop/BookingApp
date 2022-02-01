@@ -1,30 +1,40 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 
 class BookingModel{
-  String docId,hairdresserId,hairdresserName,cityBook,customerId,customerName,customerPhone,salonAddress,salonId,salonName,services, time;
-  double totalPrice;
-  bool done;
-  int slot,timeStamp;
+  String docId ='', services ='';
+  String  hairdresserId='',
+      hairdresserName='',
+      cityBook='',
+      customerId='',
+      customerName='',
+      customerPhone='',
+      salonAddress='',
+      salonId='',
+      salonName='',
+      time='';
+  double totalPrice=0;
+  bool done=false;
+  int slot=0,timeStamp=0;
 
   DocumentReference reference;
 
   BookingModel(
       {this.docId,
-      this.hairdresserId,
-      this.hairdresserName,
-      this.cityBook,
-        this.customerId,
-      this.customerName,
-      this.customerPhone,
-      this.salonAddress,
-      this.salonId,
-      this.salonName,
+       this.hairdresserId,
+         this.hairdresserName,
+         this.cityBook,
+         this.customerId,
+         this.customerName,
+         this.customerPhone,
+         this.salonAddress,
+         this.salonId,
+         this.salonName,
         this.services,
-      this.time,
-      this.done,
-      this.slot,
-        this.totalPrice,
-      this.timeStamp});
+         this.time,
+         this.done,
+         this.slot,
+       this.totalPrice,
+         this.timeStamp});
 
   BookingModel.fromJson (Map<String, dynamic> json){
     print('entered');
@@ -50,11 +60,19 @@ class BookingModel{
     print('9 done');
     done = json['done'] as bool;
     print('10 done');
-    slot = int.parse(json['slot'] == null ? '0' : json['slot'].tostring());
-    totalPrice = double.parse(json['totalPrice'] == null ? '0' : json['totalPrice'].tostring());
+    print(json['slot'].toString());
+    if(json['slot'] == null){
+      json['slot'] ='0';
+      slot = json['slot'];
+    }else{
+      slot = int.parse(json['slot'].toString());
+    }
+    //slot = int.parse(json['slot'] == null ? '0' : json['slot'].tostring());
     print('11 done');
-    timeStamp = int.parse(json['timeStamp'] == null ? '0' : json['timeStamp'].toString());
+    totalPrice = double.parse(json['totalPrice'] == null ? '0' : json['totalPrice'].tostring());
     print('12 done');
+    timeStamp = int.parse(json['timeStamp'] == null ? '0' : json['timeStamp'].toString());
+    print('13 done');
   }
 
   Map<String, dynamic> toJson() {
@@ -68,11 +86,9 @@ class BookingModel{
     data['salonId'] = this.salonId;
     data['salonName'] = this.salonName;
     data['salonAddress'] = this.salonAddress;
-    data['services'] = this.services;
     data['time'] = this.time;
     data['done'] = this.done;
     data['slot'] = this.slot;
-    data['totalPrice'] = this.totalPrice;
     data['timeStamp'] = this.timeStamp;
 
     return data;
