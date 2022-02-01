@@ -1,12 +1,40 @@
+import 'dart:convert';
+
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:first_app/model/booking_model.dart';
 import 'package:first_app/model/city_model.dart';
 import 'package:first_app/model/hairdresser_model.dart';
 import 'package:first_app/model/salon_model.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:first_app/state/state_managment.dart';
 import 'package:flutter_riverpod/fLutter_riverpod.dart';
+import 'package:intl/intl.dart';
 
+
+Future<BookingModel> getDetailBooking(BuildContext context, WidgetRef ref, int timeSlot) async {
+
+  CollectionReference userRef = FirebaseFirestore.instance
+      .collection('AllSalon')
+      .doc(ref.read(selectedCity.state).state.name)
+      .collection('Branch')
+      .doc(ref.read(selectedSalon.state).state.docId)
+      .collection('Fryzjer')
+      .doc(FirebaseAuth.instance.currentUser.uid)
+      .collection(DateFormat('dd_MM_yyyy').format(ref.read(selectedDate.state).state));
+
+  DocumentSnapshot snapshot = await userRef.doc(timeSlot.toString()).get();
+  if(snapshot.exists) {
+    var bookingModel = BookingModel.fromJson(json.decode(json.encode(snapshot.data)));
+    bookingModel.docId = snapshot.id;
+    bookingModel.reference = snapshot.reference;
+    ref.read(selectedBooking.state).state = bookingModel;
+    return bookingModel;
+  }
+  else return BookingModel();
+
+
+}
 
 Future<List<CityModel>> getCities() async {
   var cities = new List<CityModel>.empty(growable: true);

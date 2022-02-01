@@ -1,6 +1,7 @@
 
 
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:first_app/model/booking_model.dart';
 import 'package:first_app/model/city_model.dart';
 import 'package:first_app/model/hairdresser_model.dart';
 import 'package:first_app/model/salon_model.dart';
@@ -27,3 +28,4 @@ final deleteFlagRefresh = StateProvider((ref) => false);
 
 //Personel
 final staffStep = StateProvider((ref) => 1);
+final selectedBooking = StateProvider((ref) => BookingModel());
