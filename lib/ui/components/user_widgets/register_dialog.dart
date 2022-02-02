@@ -12,7 +12,7 @@ void showRegisterDialog(BuildContext context, CollectionReference userRef,
   var addressController = TextEditingController();
   Alert(
       context:context,
-      title: 'UPDATE PROFILES',
+      title: 'ZAKTUALIZUJ PROFIL',
       content:Column(
         children: [
           TextField(decoration: InputDecoration(
@@ -26,8 +26,8 @@ void showRegisterDialog(BuildContext context, CollectionReference userRef,
         ],
       ),
       buttons: [
-        DialogButton(child: Text('CANCEL'), onPressed: ()=>Navigator.pop(context)),
-        DialogButton(child: Text('UPDATE'), onPressed: (){
+        DialogButton(child: Text('Anuluj'), onPressed: ()=>Navigator.pop(context)),
+        DialogButton(child: Text('Aktualizuj'), onPressed: (){
           // update to server
           userRef.doc(FirebaseAuth.instance.currentUser.phoneNumber)
               .set({
@@ -36,7 +36,7 @@ void showRegisterDialog(BuildContext context, CollectionReference userRef,
           }).then((value) async {
             Navigator.pop(context);
             ScaffoldMessenger.of(scaffoldState.currentContext)
-                .showSnackBar(SnackBar(content: Text('UPDATE PROFILES SUCCESSFULLY!')));
+                .showSnackBar(SnackBar(content: Text('Zaktualizowano profil poprawnie!')));
             await Future.delayed(Duration(seconds: 1), () {
               // And because user already login, we will start new screen
               Navigator.pushNamedAndRemoveUntil(context, '/home', (route) => false);

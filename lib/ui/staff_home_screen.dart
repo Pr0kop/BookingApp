@@ -103,7 +103,7 @@ class StaffHome extends ConsumerWidget{
           else{
             var cities = snapshot.data as List<CityModel>;
             if(cities == null || cities.length == 0)
-              return Center(child: Text('Cannot load city list'),);
+              return Center(child: Text('Brak miast na liście'),);
             else
               return GridView.builder(
                 itemCount: cities.length,
@@ -138,7 +138,7 @@ class StaffHome extends ConsumerWidget{
           else{
             var salons = snapshot.data as List<SalonModel>;
             if(salons == null || salons.length == 0)
-              return Center(child: Text('Cannot load Salon list'),);
+              return Center(child: Text('Brak salonów na liście'),);
             else
               return  ListView.builder(
                   itemCount: salons.length,

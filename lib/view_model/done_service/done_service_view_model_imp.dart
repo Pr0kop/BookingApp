@@ -53,7 +53,7 @@ class DoneServiceViewModelImp implements DoneServiceViewModel{
 
     batch.commit().then((value){
       ScaffoldMessenger.of(scaffoldKey.currentContext)
-          .showSnackBar(SnackBar(content: Text('Process success')))
+          .showSnackBar(SnackBar(content: Text('Proces udany!')))
           .closed
           .then((v) => Navigator.of(context).pop());
 

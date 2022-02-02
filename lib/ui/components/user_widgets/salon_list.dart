@@ -16,7 +16,7 @@ displaySalon(BookingViewModel bookingViewModel, BuildContext context, WidgetRef 
         else{
           var salons = snapshot.data as List<SalonModel>;
           if(salons.length == 0)
-            return Center(child: Text('Cannot load Salon list'),);
+            return Center(child: Text('Brak salonów na liście'),);
           else
             return  ListView.builder(
                 key: PageStorageKey('keep'),
