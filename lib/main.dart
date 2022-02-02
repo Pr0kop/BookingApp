@@ -104,7 +104,7 @@ class MyHomePage extends ConsumerWidget {
       body: Container(
         decoration: BoxDecoration(
             image: DecorationImage(
-                image: AssetImage('assets/images/bookingappimg.jpg'),
+                image: AssetImage('assets/images/my_bg.png'),
                 fit: BoxFit.cover)),
         child: Column(
           mainAxisAlignment: MainAxisAlignment.end,

@@ -14,7 +14,7 @@ displayConfirm(BookingViewModel bookingViewModel, BuildContext context, WidgetRe
     crossAxisAlignment: CrossAxisAlignment.center,
     children: [
       Expanded(flex: 1, child: Padding(padding: const EdgeInsets.all(24),
-        child: Image.asset('assets/images/logo.jpg'),),),
+        child: Image.asset('assets/images/logo.png'),),),
       Expanded(flex: 3, child: Container(
           width: MediaQuery.of(context).size.width,
           child: Card(child: Padding(padding: const EdgeInsets.all(16), child:

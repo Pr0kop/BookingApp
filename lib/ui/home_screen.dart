@@ -83,7 +83,7 @@ class HomePage extends ConsumerWidget{
                         mainAxisAlignment: MainAxisAlignment.center,
                         children: [
                           Icon(Icons.book_online, size: 50,),
-                          Text('Booking', style: GoogleFonts.robotoMono(),)
+                          Text('Rezerwacje', style: GoogleFonts.robotoMono(),)
                         ],
                       ),
                     ),
@@ -98,7 +98,7 @@ class HomePage extends ConsumerWidget{
                       mainAxisAlignment: MainAxisAlignment.center,
                       children: [
                         Icon(Icons.shopping_cart, size: 50,),
-                        Text('Cart', style: GoogleFonts.robotoMono(),)
+                        Text('Koszyk', style: GoogleFonts.robotoMono(),)
                       ],
                     ),
                   ),
@@ -113,7 +113,7 @@ class HomePage extends ConsumerWidget{
                       mainAxisAlignment: MainAxisAlignment.center,
                       children: [
                         Icon(Icons.history, size: 50,),
-                        Text('History', style: GoogleFonts.robotoMono(),)
+                        Text('Historia', style: GoogleFonts.robotoMono(),)
                       ],
                     ),
                   ),
