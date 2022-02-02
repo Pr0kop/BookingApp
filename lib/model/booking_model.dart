@@ -1,8 +1,9 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 
 class BookingModel{
-  String docId ='', services ='';
-  String  hairdresserId='',
+  String docId ='',
+      services ='',
+      hairdresserId='',
       hairdresserName='',
       cityBook='',
       customerId='',

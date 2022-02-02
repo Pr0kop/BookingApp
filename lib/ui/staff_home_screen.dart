@@ -35,11 +35,21 @@ class StaffHome extends ConsumerWidget{
     var dateWatch = ref.watch(selectedDate.state).state;
    // var selectTimeWatch = ref.watch(selectedTime.state).state;
 
-    return SafeArea(child: Scaffold(
+    return SafeArea(
+      child: Scaffold(
       resizeToAvoidBottomInset: true,
       backgroundColor: Color(0xFFDFDFDF),
       appBar: AppBar(title: Text(currentStaffStep == 1 ? selectCityText : currentStaffStep == 2
-          ? selectSalonText : currentStaffStep == 3 ? yourAppoinmentText : staffHomeText),backgroundColor: Color(0xFF383838),),
+          ? selectSalonText : currentStaffStep == 3 ? yourAppoinmentText : staffHomeText),
+        backgroundColor: Color(0xFF383838),
+      actions: [
+        currentStaffStep == 3 ? InkWell(child: Icon(Icons.history),
+          onTap: ()=> Navigator.of(context).pushNamed('/bookingHistory'),
+        )
+        : Container(
+
+        )
+      ],),
       body: Column(children: [
 
         Expanded(child: currentStaffStep == 1 ? staffDisplayCity(staffHomeViewModel, ref) : currentStaffStep == 2 ? staffdisplaySalon(staffHomeViewModel, ref, cityWatch.name)

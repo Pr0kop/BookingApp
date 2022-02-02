@@ -7,6 +7,7 @@ import 'package:first_app/model/city_model.dart';
 import 'package:first_app/model/hairdresser_model.dart';
 import 'package:first_app/model/salon_model.dart';
 import 'package:first_app/state/state_managment.dart';
+import 'package:first_app/string/strings.dart';
 import 'package:first_app/utils/utils.dart';
 import 'package:first_app/view_model/booking/booking_view_model_imp.dart';
 import 'package:flutter/cupertino.dart';
@@ -80,7 +81,7 @@ class BookingScreen extends ConsumerWidget {
                             Expanded(
                                 child: ElevatedButton(
                                   onPressed: step == 1 ? null : ()=> ref.read(currentStep.state).state--,
-                                  child: Text('Previous'),
+                                  child: Text(previousText),
                                 )),
                             SizedBox(width: 30,),
                             Expanded(
@@ -92,7 +93,7 @@ class BookingScreen extends ConsumerWidget {
                                         ? null : step == 5
                                         ? null
                                         : ()=> ref.read(currentStep.state).state++,
-                                  child: Text('Next'),
+                                  child: Text(nextText),
                                 )),
                           ],
                         ),

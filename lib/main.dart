@@ -4,6 +4,7 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:first_app/ui/booking_screen.dart';
 import 'package:first_app/ui/done_services_screens.dart';
+import 'package:first_app/ui/hairdresser_booking_history_screen.dart';
 import 'package:first_app/ui/home_screen.dart';
 import 'package:first_app/ui/staff_home_screen.dart';
 import 'package:first_app/ui/user_history_screen.dart';
@@ -67,6 +68,12 @@ class MyApp extends StatelessWidget {
             return PageTransition(
                 settings: settings,
                 child: BookingScreen(),
+                type: PageTransitionType.fade);
+            break;
+          case '/bookingHistory':
+            return PageTransition(
+                settings: settings,
+                child: HairdresserHistoryScreen(),
                 type: PageTransitionType.fade);
             break;
           default:

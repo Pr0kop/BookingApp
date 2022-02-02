@@ -90,20 +90,7 @@ class HomePage extends ConsumerWidget{
                   ),
                 ),),
               ),
-              Expanded(
-                child: Container(
-                  child: Padding(
-                    padding: const EdgeInsets.all(8),
-                    child: Column(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: [
-                        Icon(Icons.shopping_cart, size: 50,),
-                        Text('Koszyk', style: GoogleFonts.robotoMono(),)
-                      ],
-                    ),
-                  ),
-                ),
-              ),
+
               Expanded(
                 child: GestureDetector(onTap: () => Navigator.pushNamed(context, '/history'),
                 child: Container(

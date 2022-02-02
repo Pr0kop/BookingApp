@@ -13,3 +13,5 @@ final notAvailableText = 'Niedostępne';
 final availableText = 'Dostępne';
 final previousText = "Wstecz";
 final nextText = 'Dalej';
+final historyErrorText = 'Nie mogę załadować historii';
+final historyHairdresserErrorText = 'Nie masz żadnych terminów';

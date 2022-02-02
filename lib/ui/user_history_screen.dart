@@ -8,6 +8,7 @@ import 'package:first_app/model/city_model.dart';
 import 'package:first_app/model/hairdresser_model.dart';
 import 'package:first_app/model/salon_model.dart';
 import 'package:first_app/state/state_managment.dart';
+import 'package:first_app/string/strings.dart';
 import 'package:first_app/utils/utils.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
@@ -31,7 +32,7 @@ class UserHistory extends ConsumerWidget {
     return SafeArea(
         child: Scaffold(
           key:scaffoldKey,
-          appBar: AppBar(title: Text('User History'),),
+          appBar: AppBar(title: Text('Historia rezerwacji'),),
           resizeToAvoidBottomInset: true,
           backgroundColor: Color(0XFFFDF9EE),
           body: Padding(padding: const EdgeInsets.all(12), child: displayUserHistory(context, ref),)
@@ -48,7 +49,7 @@ class UserHistory extends ConsumerWidget {
             print(userBookings);
             print(snapshot);
             if(userBookings == null || userBookings.length == 0)
-              return Center(child: Text('Cannot load booking history'),);
+              return Center(child: Text(historyErrorText),);
             else
               return FutureBuilder(
                   future: syncTime(),
@@ -153,7 +154,7 @@ class UserHistory extends ConsumerWidget {
                                   ),
                                   child: Row(mainAxisAlignment: MainAxisAlignment.center,children:[
                                     Padding(padding: const EdgeInsets.symmetric(vertical: 10),
-                                      child: Text(userBookings[index].done ? 'Finish' :isExpired ? 'Expired' : 'Anuluj', style: GoogleFonts.robotoMono(color: isExpired ? Colors.grey : Colors.white),),)
+                                      child: Text(userBookings[index].done ? 'Zakończone' :isExpired ? 'Po terminie' : 'Anuluj', style: GoogleFonts.robotoMono(color: isExpired ? Colors.grey : Colors.white),),)
                                   ])
                               ),)
                             ],),
