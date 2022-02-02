@@ -20,11 +20,11 @@ import 'package:im_stepper/stepper.dart';
 import 'package:intl/intl.dart';
 import 'package:provider/src/provider.dart';
 
-import 'components/city_list.dart';
-import 'components/confirm.dart';
-import 'components/hairdresser_list.dart';
-import 'components/salon_list.dart';
-import 'components/time_slot.dart';
+import 'components/user_widgets/city_list.dart';
+import 'components/user_widgets/confirm.dart';
+import 'components/user_widgets/hairdresser_list.dart';
+import 'components/user_widgets/salon_list.dart';
+import 'components/user_widgets/time_slot.dart';
 class BookingScreen extends ConsumerWidget {
 
   final scaffoldKey = new GlobalKey<ScaffoldState>();

@@ -6,7 +6,7 @@ import 'package:firebase_auth_ui/firebase_auth_ui.dart';
 import 'package:firebase_auth_ui/providers.dart';
 
 import 'package:first_app/state/state_managment.dart';
-import 'package:first_app/ui/components/register_dialog.dart';
+import 'package:first_app/ui/components/user_widgets/register_dialog.dart';
 import 'package:first_app/utils/utils.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';

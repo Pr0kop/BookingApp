@@ -8,7 +8,11 @@ import 'package:first_app/model/image_model.dart';
 import 'package:first_app/model/salon_model.dart';
 import 'package:first_app/model/user_model.dart';
 import 'package:first_app/state/state_managment.dart';
+import 'package:first_app/string/strings.dart';
+import 'package:first_app/ui/components/staff_widgets/salon_list.dart';
 import 'package:first_app/utils/utils.dart';
+import 'package:first_app/view_model/staff_home/staff_home_view_model.dart';
+import 'package:first_app/view_model/staff_home/staff_home_view_model_imp.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/src/widgets/framework.dart';
 import 'package:flutter_datetime_picker/flutter_datetime_picker.dart';
@@ -16,7 +20,13 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:intl/intl.dart';
 
+import 'components/staff_widgets/appoiment_list.dart';
+import 'components/staff_widgets/city_list.dart';
+
 class StaffHome extends ConsumerWidget{
+
+  final staffHomeViewModel = StaffHomeViewModelImp();
+
   @override
   Widget build(BuildContext context, ref) {
     var currentStaffStep = ref.watch(staffStep.state).state;
@@ -28,12 +38,12 @@ class StaffHome extends ConsumerWidget{
     return SafeArea(child: Scaffold(
       resizeToAvoidBottomInset: true,
       backgroundColor: Color(0xFFDFDFDF),
-      appBar: AppBar(title: Text(currentStaffStep == 1 ? 'Wybierz miasto' : currentStaffStep == 2
-          ? 'Wybierz salon' : currentStaffStep == 3 ? 'Twoj kalendarz' : 'Personel'),backgroundColor: Color(0xFF383838),),
+      appBar: AppBar(title: Text(currentStaffStep == 1 ? selectCityText : currentStaffStep == 2
+          ? selectSalonText : currentStaffStep == 3 ? yourAppoinmentText : staffHomeText),backgroundColor: Color(0xFF383838),),
       body: Column(children: [
 
-        Expanded(child: currentStaffStep == 1 ? displayCity(ref) : currentStaffStep == 2 ? displaySalon(ref, cityWatch.name)
-            : currentStaffStep == 3 ? displayAppoiment(context, ref)
+        Expanded(child: currentStaffStep == 1 ? staffDisplayCity(staffHomeViewModel, ref) : currentStaffStep == 2 ? staffdisplaySalon(staffHomeViewModel, ref, cityWatch.name)
+            : currentStaffStep == 3 ? displayAppoiment(staffHomeViewModel, context, ref)
         : Container(), flex: 10,),
         //button
         Expanded(
@@ -47,21 +57,20 @@ class StaffHome extends ConsumerWidget{
                   Expanded(
                       child: ElevatedButton(
                         onPressed: currentStaffStep == 1 ? null : ()=> ref.read(staffStep.state).state--,
-                        child: Text('Previous'),
+                        child: Text(previousText),
                       )),
                   SizedBox(width: 30,),
                   Expanded(
                       child: ElevatedButton(
                         onPressed: (currentStaffStep == 1
-                            && ref.read(selectedCity.state).state.name ==
-                                null) ||
+                            && ref.read(selectedCity.state).state.name.length == 0) ||
                             (currentStaffStep == 2 &&
-                                ref.read(selectedSalon.state).state.docId ==
+                                ref.read(selectedSalon.state).state.docId == // docId!.length == 0
                                     null) ||
                             currentStaffStep == 3
                             ? null
                             : ()=> ref.read(staffStep.state).state++,
-                        child: Text('Next'),
+                        child: Text(nextText),
                       )),
                 ],
               ),
@@ -145,113 +154,5 @@ class StaffHome extends ConsumerWidget{
 
   }
 
-  displayAppoiment(BuildContext context, WidgetRef ref) {
 
-    //spr czy uzytkownik pracuje jako personel w salonie
-    return FutureBuilder(
-        future: checkStaffOfThisSalon(context, ref),
-        builder: (context,snapshot){
-          if(snapshot.connectionState == ConnectionState.waiting)
-            return Center(child: CircularProgressIndicator(),);
-          else {
-
-            var result = snapshot.data as bool;
-            if(result) return displaySlot(context, ref);
-            else return Center(child: Text('Nie jestes pracownikiem tego salonu!'),);
-          }
-        });
-  }
-
-  displaySlot(BuildContext context, WidgetRef ref) {
-    var now = ref.read(selectedDate.state).state;
-
-    return Column(
-        children: [
-          Container(
-              color: Color(0xFF008577),
-              child: Row(
-                crossAxisAlignment: CrossAxisAlignment.center,
-                children: [
-                  Expanded(child:
-                  Center(child: Padding(padding: const EdgeInsets.all(12), child: Column(children: [
-                    Text('${DateFormat.MMMM().format(now)}',
-                      style: GoogleFonts.robotoMono(color: Colors.white54),),
-                    Text('${now.day}', style: GoogleFonts.robotoMono(color:Colors.white, fontWeight: FontWeight.bold, fontSize: 22),
-                    ),
-                    Text('${DateFormat.EEEE().format(now)}',
-                      style: GoogleFonts.robotoMono(color: Colors.white54),),
-                  ],),),),),
-                  GestureDetector(onTap: (){
-                    DatePicker.showDatePicker(context,showTitleActions: true,
-                        minTime: DateTime.now(),
-                        maxTime: now.add(Duration(days: 31)),
-                        onConfirm: (date) => ref.read(selectedDate.state).state = date); // next time you can choose is 31 days next
-                  }, child: Padding(
-                    padding: const EdgeInsets.all(8),
-                    child: Align(
-                      alignment: Alignment.centerRight,
-                      child: Icon(Icons.calendar_today, color:Colors.white),
-                    ),
-                  ),)
-                ],
-              )
-          ),
-          Expanded(
-            child: FutureBuilder(
-                future: getMaxAvailableTimeslot(ref.read(selectedDate.state).state),
-                builder: (context,snapshot){
-                  if(snapshot.connectionState == ConnectionState.waiting)
-                    return Center(child: CircularProgressIndicator(),);
-                  else
-                  {
-                    var maxTimeSlot = snapshot.data as int;
-                    return FutureBuilder(
-
-                      future: getBookingSlotOfHairdresser(context, ref, DateFormat('dd_MM_yyyy').format(ref.read(selectedDate.state).state)),
-                      builder: (context,snapshot) {
-                        if(snapshot.connectionState == ConnectionState.waiting)
-                          return Center(child: CircularProgressIndicator(),);
-                        else {
-                          var listTimeSlot = snapshot.data as List<int>;
-                          return GridView.builder(
-                              itemCount: TIME_SLOT.length,
-                              gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(crossAxisCount: 3),
-                              itemBuilder: (context,index)=> GestureDetector(
-                                onTap:
-                                    !listTimeSlot.contains(index) ? null : () => processDoneServices(context, ref, index),
-
-                                child: Card(
-                                  color: listTimeSlot.contains(index) ? Colors.white10 : maxTimeSlot > index ? Colors.white60 : ref.read(selectedTime.state).state == TIME_SLOT.elementAt(index) ? Colors.white54 : Colors.white,
-                                  child: GridTile(
-                                    child: Center(
-                                      child: Column(
-                                        crossAxisAlignment: CrossAxisAlignment.center,
-                                        mainAxisAlignment: MainAxisAlignment.center,
-                                        children: [
-                                          Text('${TIME_SLOT.elementAt(index)}'),
-                                          Text(
-                                              listTimeSlot.contains(index) ? 'Zajęte' :
-                                          maxTimeSlot > index ? 'Niedostępne'
-                                              : 'Dostępne')
-                                        ],),),
-                                    header: ref.read(selectedTime.state).state == TIME_SLOT.elementAt(index) ? Icon(Icons.check):null,
-                                  ),),
-                              ));
-                        }
-
-                      },
-                    );
-                  }
-                }
-            ),
-          )
-        ]
-    );
-  }
-
-  processDoneServices(BuildContext context, WidgetRef ref, int index) {
-    ref.read(selectedTimeSlot.state).state = index;
-    Navigator.of(context).pushNamed('/doneService');
-
-  }
 }
